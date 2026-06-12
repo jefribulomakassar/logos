@@ -8,11 +8,6 @@ export default function Header({ logoCount }: { logoCount: number }) {
           <span className="mark-dot" />
           <span className="mark-text">LogoFolio</span>
         </div>
-        <nav className="header-nav">
-          <a href="https://conversa2026.vercel.app" target="_blank" rel="noopener noreferrer" className="nav-link">
-            Conversa AI ↗
-          </a>
-        </nav>
       </div>
 
       {/* Hero */}
@@ -42,11 +37,11 @@ export default function Header({ logoCount }: { logoCount: number }) {
           z-index: 1;
         }
         .header-inner {
-          max-width: 1280px;
+          max-width: 1600px;
           margin: 0 auto;
-          padding: 24px 24px;
+          padding: 24px 40px;
           display: flex;
-          justify-content: space-between;
+          justify-content: flex-start;
           align-items: center;
         }
         .logo-mark {
@@ -69,23 +64,10 @@ export default function Header({ logoCount }: { logoCount: number }) {
           color: var(--text-primary);
         }
 
-        .header-nav {
-          display: flex;
-          gap: 24px;
-          align-items: center;
-        }
-        .nav-link {
-          font-size: 13px;
-          color: var(--text-secondary);
-          transition: color 0.2s;
-          font-weight: 500;
-        }
-        .nav-link:hover { color: var(--accent-gold); }
-
         .hero {
-          max-width: 1280px;
+          max-width: 1600px;
           margin: 0 auto;
-          padding: 48px 24px 56px;
+          padding: 48px 40px 56px;
           position: relative;
         }
         .hero-eyebrow {
@@ -153,7 +135,6 @@ export default function Header({ logoCount }: { logoCount: number }) {
           50% { transform: translateY(4px); }
         }
 
-        /* Ambient glow behind hero */
         .hero::before {
           content: '';
           position: absolute;
@@ -175,7 +156,7 @@ export default function Header({ logoCount }: { logoCount: number }) {
           pointer-events: none;
         }
 
-        @media (max-width: 640px) {
+        @media (max-width: 768px) {
           .header-inner { padding: 18px 16px; }
           .hero { padding: 32px 16px 40px; }
         }
