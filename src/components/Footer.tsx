@@ -10,22 +10,13 @@ export default function Footer() {
         </div>
         <p className="footer-text">
           Premium logos by{' '}
-          <a
+          
             href="https://www.logoground.com"
             target="_blank"
             rel="noopener noreferrer"
             className="footer-link"
           >
             jeflodesign
-          </a>{' '}
-          · Powered by{' '}
-          <a
-            href="https://conversa2026.vercel.app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="footer-link"
-          >
-            Conversa AI
           </a>
         </p>
       </div>
@@ -35,9 +26,9 @@ export default function Footer() {
           margin-top: 20px;
         }
         .footer-inner {
-          max-width: 1280px;
+          max-width: 1600px;
           margin: 0 auto;
-          padding: 28px 24px;
+          padding: 28px 40px;
           display: flex;
           justify-content: space-between;
           align-items: center;
