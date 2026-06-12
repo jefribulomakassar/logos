@@ -1,119 +1,8 @@
-'use client'
-
-import { useState, useMemo } from 'react'
-import { Logo } from '@/lib/sheets'
-import LogoCard from './LogoCard'
-
-interface LogoGridProps {
-  logos: Logo[]
-  categories: string[]
-}
-
-export default function LogoGrid({ logos, categories }: LogoGridProps) {
-  const [search, setSearch] = useState('')
-  const [activeCategory, setActiveCategory] = useState('All')
-  const [sortBy, setSortBy] = useState<'newest' | 'price-asc' | 'price-desc'>('newest')
-
-  const filtered = useMemo(() => {
-    let result = logos
-
-    if (activeCategory !== 'All') {
-      result = result.filter(l =>
-        l.mainCategory === activeCategory ||
-        l.secondCategories.includes(activeCategory)
-      )
-    }
-
-    if (search.trim()) {
-      const q = search.toLowerCase()
-      result = result.filter(l =>
-        l.title.toLowerCase().includes(q) ||
-        l.description.toLowerCase().includes(q) ||
-        l.keywords.toLowerCase().includes(q) ||
-        l.mainCategory.toLowerCase().includes(q)
-      )
-    }
-
-    if (sortBy === 'price-asc') result = [...result].sort((a, b) => a.price - b.price)
-    if (sortBy === 'price-desc') result = [...result].sort((a, b) => b.price - a.price)
-
-    return result
-  }, [logos, activeCategory, search, sortBy])
-
-  return (
-    <section className="grid-section">
-      {/* Controls */}
-      <div className="controls">
-        <div className="search-wrap">
-          <svg className="search-icon" viewBox="0 0 20 20" fill="none">
-            <circle cx="9" cy="9" r="6" stroke="currentColor" strokeWidth="1.5"/>
-            <path d="M13.5 13.5L17 17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-          </svg>
-          <input
-            type="text"
-            placeholder="Search logos, keywords..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            className="search-input"
-          />
-          {search && (
-            <button className="search-clear" onClick={() => setSearch('')}>✕</button>
-          )}
-        </div>
-        <select
-          value={sortBy}
-          onChange={e => setSortBy(e.target.value as typeof sortBy)}
-          className="sort-select"
-        >
-          <option value="newest">Newest</option>
-          <option value="price-asc">Price: Low → High</option>
-          <option value="price-desc">Price: High → Low</option>
-        </select>
-      </div>
-
-      {/* Category filter */}
-      <div className="cat-filter">
-        {['All', ...categories].map(cat => (
-          <button
-            key={cat}
-            onClick={() => setActiveCategory(cat)}
-            className={`cat-btn ${activeCategory === cat ? 'active' : ''}`}
-          >
-            {cat}
-          </button>
-        ))}
-      </div>
-
-      {/* Result count */}
-      <p className="result-count">
-        {filtered.length === logos.length
-          ? `${logos.length} logos`
-          : `${filtered.length} of ${logos.length} logos`}
-        {activeCategory !== 'All' && ` in ${activeCategory}`}
-      </p>
-
-      {/* Grid */}
-      {filtered.length > 0 ? (
-        <div className="logo-grid">
-          {filtered.map(logo => (
-            <LogoCard key={logo.id} logo={logo} />
-          ))}
-        </div>
-      ) : (
-        <div className="empty-state">
-          <span className="empty-icon">◎</span>
-          <p>No logos match your search.</p>
-          <button onClick={() => { setSearch(''); setActiveCategory('All') }} className="reset-btn">
-            Clear filters
-          </button>
-        </div>
-      )}
-
-      <style jsx>{`
+<style jsx>{`
         .grid-section {
-          max-width: 1280px;
+          max-width: 1600px;
           margin: 0 auto;
-          padding: 0 24px 80px;
+          padding: 0 40px 80px;
         }
 
         .controls {
@@ -126,7 +15,7 @@ export default function LogoGrid({ logos, categories }: LogoGridProps) {
         .search-wrap {
           position: relative;
           flex: 1;
-          min-width: 240px;
+          min-width: 280px;
         }
         .search-icon {
           position: absolute;
@@ -217,8 +106,8 @@ export default function LogoGrid({ logos, categories }: LogoGridProps) {
 
         .logo-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-          gap: 20px;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 24px;
         }
 
         .empty-state {
@@ -249,13 +138,14 @@ export default function LogoGrid({ logos, categories }: LogoGridProps) {
         }
         .reset-btn:hover { border-color: var(--accent-gold); }
 
+        @media (max-width: 1024px) {
+          .logo-grid { grid-template-columns: repeat(2, 1fr); }
+          .grid-section { padding: 0 24px 60px; }
+        }
         @media (max-width: 640px) {
           .grid-section { padding: 0 16px 60px; }
-          .logo-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+          .logo-grid { grid-template-columns: 1fr; gap: 16px; }
           .controls { flex-direction: column; }
           .sort-select { min-width: unset; width: 100%; }
         }
       `}</style>
-    </section>
-  )
-}
