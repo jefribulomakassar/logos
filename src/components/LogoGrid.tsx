@@ -1,3 +1,5 @@
+'use client'
+import { useState, useMemo } from 'react'
 <style jsx>{`
         .grid-section {
           max-width: 1600px;
