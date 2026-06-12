@@ -5,7 +5,7 @@ export default function Footer() {
     <footer className="footer">
       <div className="footer-inner">
         <div className="footer-brand">
-          <span className="footer-dot" />
+          <span className="footer-dot"/>
           <span>LogoFolio</span>
         </div>
         <p className="footer-text">
