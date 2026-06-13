@@ -25,7 +25,7 @@ export default function LogoDetailClient({ logo, imageUrl }: Props) {
   useEffect(() => {
     if (!logo.mockupFolderId) return
     setLoadingMockups(true)
-    fetch(`/api/mockups?folderId=${logo.mockupFolderId}`)
+    fetch('/api/mockups?folderId=' + logo.mockupFolderId)
       .then(r => r.json())
       .then(data => setMockups(data.images || []))
       .catch(console.error)
@@ -36,474 +36,130 @@ export default function LogoDetailClient({ logo, imageUrl }: Props) {
   const priceDisplay = logo.price ? '$' + logo.price.toLocaleString() : 'Contact'
 
   return (
-    <main className="detail-page">
-      {/* Back button */}
-      <div className="topbar">
-        <button className="back-btn" onClick={() => router.back()}>
-          <svg viewBox="0 0 16 16" fill="none" width="14" height="14">
-            <path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-          Back
+    <main style={{ minHeight: '100vh', position: 'relative', zIndex: 1 }}>
+      {/* Topbar */}
+      <div style={{ maxWidth: 1600, margin: '0 auto', padding: '20px 40px', display: 'flex', alignItems: 'center', gap: 20, borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+        <button
+          onClick={() => router.back()}
+          style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#12121A', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, padding: '8px 14px', color: '#8A8A9A', fontFamily: 'Inter, sans-serif', fontSize: 13, cursor: 'pointer' }}
+        >
+          ← Back
         </button>
-        <div className="logo-mark">
-          <span className="mark-dot" />
-          <span className="mark-text">LogoFolio</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ width: 7, height: 7, background: '#F5C842', borderRadius: '50%', display: 'inline-block', boxShadow: '0 0 10px rgba(245,200,66,0.5)' }} />
+          <span style={{ fontFamily: 'Space Grotesk, sans-serif', fontWeight: 700, fontSize: 16, letterSpacing: '-0.03em', color: '#F5F5F0' }}>LogoFolio</span>
         </div>
       </div>
 
-      <div className="detail-layout">
-        {/* LEFT — image + mockup thumbnails */}
-        <div className="detail-left">
-          <div className="main-image-wrap">
+      {/* Main layout */}
+      <div style={{ maxWidth: 1600, margin: '0 auto', padding: '48px 40px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 60, alignItems: 'start' }}>
+        
+        {/* LEFT */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div style={{ aspectRatio: '1/1', background: '#0D0D15', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 20, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             {!imgError && activeImg ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={activeImg}
-                alt={logo.title}
-                className="main-image"
-                onError={() => setImgError(true)}
-              />
+              <img src={activeImg} alt={logo.title} onError={() => setImgError(true)} style={{ width: '100%', height: '100%', objectFit: 'contain', padding: 32 }} />
             ) : (
-              <div className="main-image-placeholder">
-                {logo.title.charAt(0)}
-              </div>
+              <span style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: '5rem', fontWeight: 700, color: '#4A4A5A' }}>{logo.title.charAt(0)}</span>
             )}
           </div>
 
-          {/* Thumbnail strip: logo + mockups */}
-          <div className="thumb-strip">
+          {/* Thumbnail strip */}
+          <div style={{ display: 'flex', gap: 10, overflowX: 'auto', paddingBottom: 4 }}>
             <button
-              className={`thumb-btn ${activeImg === imageUrl ? 'active' : ''}`}
               onClick={() => setActiveImg(imageUrl)}
+              style={{ flexShrink: 0, width: 72, background: '#12121A', border: activeImg === imageUrl ? '2px solid #F5C842' : '2px solid rgba(255,255,255,0.08)', borderRadius: 8, overflow: 'hidden', cursor: 'pointer', padding: 0 }}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={imageUrl} alt="logo" className="thumb-img" onError={() => {}} />
-              <span className="thumb-label">Logo</span>
+              <img src={imageUrl} alt="logo" style={{ width: '100%', aspectRatio: '1/1', objectFit: 'contain', background: '#0D0D15', padding: 4 }} />
+              <span style={{ display: 'block', fontSize: 9, color: '#4A4A5A', textAlign: 'center', padding: '3px 0', fontFamily: 'Inter, sans-serif' }}>Logo</span>
             </button>
 
             {loadingMockups && (
-              <div className="thumb-loading">
-                <span className="spinner" />
+              <div style={{ width: 72, height: 72, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#12121A', border: '2px solid rgba(255,255,255,0.08)', borderRadius: 8, flexShrink: 0 }}>
+                <span style={{ fontSize: 12, color: '#4A4A5A' }}>...</span>
               </div>
             )}
 
             {mockups.map((m, i) => (
               <button
                 key={m.id}
-                className={`thumb-btn ${activeImg === m.thumbnailUrl ? 'active' : ''}`}
                 onClick={() => setActiveImg(m.thumbnailUrl)}
+                style={{ flexShrink: 0, width: 72, background: '#12121A', border: activeImg === m.thumbnailUrl ? '2px solid #F5C842' : '2px solid rgba(255,255,255,0.08)', borderRadius: 8, overflow: 'hidden', cursor: 'pointer', padding: 0 }}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={m.thumbnailUrl} alt={`mockup ${i + 1}`} className="thumb-img" />
-                <span className="thumb-label">#{i + 1}</span>
+                <img src={m.thumbnailUrl} alt={'mockup ' + (i + 1)} style={{ width: '100%', aspectRatio: '1/1', objectFit: 'contain', background: '#0D0D15', padding: 4 }} />
+                <span style={{ display: 'block', fontSize: 9, color: '#4A4A5A', textAlign: 'center', padding: '3px 0', fontFamily: 'Inter, sans-serif' }}>#{i + 1}</span>
               </button>
             ))}
           </div>
         </div>
 
-        {/* RIGHT — detail info */}
-        <div className="detail-right">
-          <div className="cats-row">
+        {/* RIGHT */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
             {allCategories.map(cat => (
-              <span key={cat} className="cat-badge">{cat}</span>
+              <span key={cat} style={{ fontSize: 11, fontWeight: 500, letterSpacing: '0.04em', textTransform: 'uppercase', color: '#4F8EF7', background: 'rgba(79,142,247,0.15)', padding: '4px 10px', borderRadius: 4 }}>{cat}</span>
             ))}
           </div>
 
-          <h1 className="detail-title">{logo.title}</h1>
+          <h1 style={{ fontSize: 'clamp(1.8rem, 3vw, 2.8rem)', fontWeight: 700, letterSpacing: '-0.03em', color: '#F5F5F0', lineHeight: 1.1, fontFamily: 'Space Grotesk, sans-serif' }}>{logo.title}</h1>
 
-          <div className="price-row">
-            <span className="detail-price">{priceDisplay}</span>
-            <span className="detail-creator">by {logo.creator}</span>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 16 }}>
+            <span style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: '2rem', fontWeight: 700, color: '#F5C842' }}>{priceDisplay}</span>
+            <span style={{ fontSize: 13, color: '#4A4A5A', fontStyle: 'italic' }}>by {logo.creator}</span>
           </div>
 
-          <p className="detail-desc">{logo.description}</p>
+          <p style={{ fontSize: 15, color: '#8A8A9A', lineHeight: 1.75, borderLeft: '2px solid rgba(245,200,66,0.3)', paddingLeft: 16 }}>{logo.description}</p>
 
-          <div className="keywords-wrap">
-            <span className="section-label">Keywords</span>
-            <div className="keywords-list">
+          <div>
+            <span style={{ display: 'block', fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#4A4A5A', marginBottom: 10 }}>Keywords</span>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
               {logo.keywords.split(' ').filter(Boolean).map(kw => (
-                <span key={kw} className="keyword-tag">{kw}</span>
+                <span key={kw} style={{ fontSize: 11, color: '#8A8A9A', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', padding: '4px 10px', borderRadius: 100 }}>{kw}</span>
               ))}
             </div>
           </div>
 
-          <div className="meta-grid">
-            <div className="meta-item">
-              <span className="meta-label">Published</span>
-              <span className="meta-value">{logo.published}</span>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, padding: 20, background: '#12121A', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 14 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <span style={{ fontSize: 11, color: '#4A4A5A', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase' }}>Published</span>
+              <span style={{ fontSize: 14, color: '#F5F5F0', fontWeight: 500 }}>{logo.published}</span>
             </div>
-            <div className="meta-item">
-              <span className="meta-label">Mockups</span>
-              <span className="meta-value">
-                {loadingMockups ? 'Loading...' : `${mockups.length} images`}
-              </span>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <span style={{ fontSize: 11, color: '#4A4A5A', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase' }}>Mockups</span>
+              <span style={{ fontSize: 14, color: '#F5F5F0', fontWeight: 500 }}>{loadingMockups ? 'Loading...' : mockups.length + ' images'}</span>
             </div>
           </div>
 
-          <div className="cta-row">
+          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
             {logo.logoUrl && (
-              
-                href={logo.logoUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn-primary"
-              >
-                View on LogoGround
-                <svg viewBox="0 0 16 16" fill="none" width="13" height="13">
-                  <path d="M6 3H3a1 1 0 00-1 1v9a1 1 0 001 1h9a1 1 0 001-1v-3M10 2h4m0 0v4m0-4L7 9" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
+              <a href={logo.logoUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'linear-gradient(135deg,#F5C842,#E8A020)', color: '#0A0A0F', border: 'none', borderRadius: 14, padding: '13px 22px', fontFamily: 'Space Grotesk, sans-serif', fontWeight: 600, fontSize: 14, cursor: 'pointer', textDecoration: 'none' }}>
+                View on LogoGround ↗
               </a>
             )}
-            <button className="btn-ghost" onClick={() => router.back()}>
+            <button onClick={() => router.back()} style={{ background: '#12121A', color: '#8A8A9A', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 14, padding: '13px 22px', fontFamily: 'Inter, sans-serif', fontSize: 14, cursor: 'pointer' }}>
               ← Back to Gallery
             </button>
           </div>
         </div>
       </div>
 
-      {/* Full mockup gallery bawah */}
+      {/* Mockup gallery */}
       {mockups.length > 0 && (
-        <div className="mockup-gallery">
-          <h2 className="gallery-title">Mockup Gallery</h2>
-          <div className="gallery-grid">
+        <div style={{ maxWidth: 1600, margin: '0 auto', padding: '0 40px 80px' }}>
+          <h2 style={{ fontSize: '1.4rem', fontWeight: 600, color: '#F5F5F0', marginBottom: 24, paddingTop: 32, borderTop: '1px solid rgba(255,255,255,0.08)', fontFamily: 'Space Grotesk, sans-serif' }}>Mockup Gallery</h2>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
             {mockups.map((m, i) => (
-              <a key={m.id} href={m.viewUrl} target="_blank" rel="noopener noreferrer" className="gallery-item">
+              <a key={m.id} href={m.viewUrl} target="_blank" rel="noopener noreferrer" style={{ borderRadius: 14, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.08)', display: 'block' }}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={m.thumbnailUrl} alt={`mockup ${i + 1}`} className="gallery-img" loading="lazy" />
+                <img src={m.thumbnailUrl} alt={'mockup ' + (i + 1)} loading="lazy" style={{ width: '100%', aspectRatio: '4/3', objectFit: 'cover', display: 'block' }} />
               </a>
             ))}
           </div>
         </div>
       )}
-
-      <style jsx>{`
-        .detail-page {
-          min-height: 100vh;
-          position: relative;
-          z-index: 1;
-        }
-
-        .topbar {
-          max-width: 1600px;
-          margin: 0 auto;
-          padding: 20px 40px;
-          display: flex;
-          align-items: center;
-          gap: 20px;
-          border-bottom: 1px solid var(--border);
-        }
-        .back-btn {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          background: var(--bg-card);
-          border: 1px solid var(--border);
-          border-radius: 8px;
-          padding: 8px 14px;
-          color: var(--text-secondary);
-          font-family: 'Inter', sans-serif;
-          font-size: 13px;
-          cursor: pointer;
-          transition: all 0.2s;
-        }
-        .back-btn:hover {
-          border-color: rgba(245,200,66,0.3);
-          color: var(--text-primary);
-        }
-        .logo-mark {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        }
-        .mark-dot {
-          width: 7px; height: 7px;
-          background: var(--gradient-gold);
-          border-radius: 50%;
-          box-shadow: 0 0 10px rgba(245,200,66,0.5);
-        }
-        .mark-text {
-          font-family: 'Space Grotesk', sans-serif;
-          font-weight: 700;
-          font-size: 16px;
-          letter-spacing: -0.03em;
-          color: var(--text-primary);
-        }
-
-        .detail-layout {
-          max-width: 1600px;
-          margin: 0 auto;
-          padding: 48px 40px;
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 60px;
-          align-items: start;
-        }
-
-        /* LEFT */
-        .detail-left { display: flex; flex-direction: column; gap: 16px; }
-        .main-image-wrap {
-          aspect-ratio: 1 / 1;
-          background: #0D0D15;
-          border: 1px solid var(--border);
-          border-radius: var(--radius-lg);
-          overflow: hidden;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-        .main-image {
-          width: 100%;
-          height: 100%;
-          object-fit: contain;
-          padding: 32px;
-        }
-        .main-image-placeholder {
-          font-family: 'Space Grotesk', sans-serif;
-          font-size: 5rem;
-          font-weight: 700;
-          color: var(--text-muted);
-        }
-
-        .thumb-strip {
-          display: flex;
-          gap: 10px;
-          overflow-x: auto;
-          padding-bottom: 4px;
-          scrollbar-width: thin;
-          scrollbar-color: var(--text-muted) transparent;
-        }
-        .thumb-strip::-webkit-scrollbar { height: 3px; }
-        .thumb-strip::-webkit-scrollbar-thumb { background: var(--text-muted); border-radius: 2px; }
-
-        .thumb-btn {
-          flex-shrink: 0;
-          width: 72px;
-          background: var(--bg-card);
-          border: 2px solid var(--border);
-          border-radius: 8px;
-          overflow: hidden;
-          cursor: pointer;
-          transition: border-color 0.2s;
-          padding: 0;
-          display: flex;
-          flex-direction: column;
-        }
-        .thumb-btn:hover { border-color: rgba(245,200,66,0.3); }
-        .thumb-btn.active { border-color: var(--accent-gold); }
-        .thumb-img {
-          width: 100%;
-          aspect-ratio: 1/1;
-          object-fit: contain;
-          background: #0D0D15;
-          padding: 4px;
-        }
-        .thumb-label {
-          font-size: 9px;
-          color: var(--text-muted);
-          text-align: center;
-          padding: 3px 0;
-          font-family: 'Inter', sans-serif;
-        }
-        .thumb-loading {
-          width: 72px;
-          height: 72px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background: var(--bg-card);
-          border: 2px solid var(--border);
-          border-radius: 8px;
-          flex-shrink: 0;
-        }
-
-        .spinner {
-          width: 14px; height: 14px;
-          border: 2px solid rgba(255,255,255,0.1);
-          border-top-color: var(--accent-gold);
-          border-radius: 50%;
-          animation: spin 0.7s linear infinite;
-          display: inline-block;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        /* RIGHT */
-        .detail-right { display: flex; flex-direction: column; gap: 24px; }
-
-        .cats-row { display: flex; flex-wrap: wrap; gap: 6px; }
-        .cat-badge {
-          font-size: 11px;
-          font-weight: 500;
-          letter-spacing: 0.04em;
-          text-transform: uppercase;
-          color: var(--accent-blue);
-          background: var(--accent-blue-dim);
-          padding: 4px 10px;
-          border-radius: 4px;
-        }
-
-        .detail-title {
-          font-size: clamp(1.8rem, 3vw, 2.8rem);
-          font-weight: 700;
-          letter-spacing: -0.03em;
-          color: var(--text-primary);
-          line-height: 1.1;
-        }
-
-        .price-row {
-          display: flex;
-          align-items: baseline;
-          gap: 16px;
-        }
-        .detail-price {
-          font-family: 'Space Grotesk', sans-serif;
-          font-size: 2rem;
-          font-weight: 700;
-          color: var(--accent-gold);
-        }
-        .detail-creator {
-          font-size: 13px;
-          color: var(--text-muted);
-          font-style: italic;
-        }
-
-        .detail-desc {
-          font-size: 15px;
-          color: var(--text-secondary);
-          line-height: 1.75;
-          border-left: 2px solid rgba(245,200,66,0.3);
-          padding-left: 16px;
-        }
-
-        .section-label {
-          display: block;
-          font-size: 11px;
-          font-weight: 600;
-          letter-spacing: 0.08em;
-          text-transform: uppercase;
-          color: var(--text-muted);
-          margin-bottom: 10px;
-        }
-        .keywords-list {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 6px;
-        }
-        .keyword-tag {
-          font-size: 11px;
-          color: var(--text-secondary);
-          background: rgba(255,255,255,0.05);
-          border: 1px solid var(--border);
-          padding: 4px 10px;
-          border-radius: 100px;
-        }
-
-        .meta-grid {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 16px;
-          padding: 20px;
-          background: var(--bg-card);
-          border: 1px solid var(--border);
-          border-radius: var(--radius-md);
-        }
-        .meta-item { display: flex; flex-direction: column; gap: 4px; }
-        .meta-label {
-          font-size: 11px;
-          color: var(--text-muted);
-          font-weight: 600;
-          letter-spacing: 0.06em;
-          text-transform: uppercase;
-        }
-        .meta-value {
-          font-size: 14px;
-          color: var(--text-primary);
-          font-weight: 500;
-        }
-
-        .cta-row { display: flex; gap: 12px; flex-wrap: wrap; }
-        .btn-primary {
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
-          background: var(--gradient-gold);
-          color: #0A0A0F;
-          border: none;
-          border-radius: var(--radius-md);
-          padding: 13px 22px;
-          font-family: 'Space Grotesk', sans-serif;
-          font-weight: 600;
-          font-size: 14px;
-          cursor: pointer;
-          transition: opacity 0.2s;
-          text-decoration: none;
-        }
-        .btn-primary:hover { opacity: 0.88; }
-        .btn-ghost {
-          background: var(--bg-card);
-          color: var(--text-secondary);
-          border: 1px solid var(--border);
-          border-radius: var(--radius-md);
-          padding: 13px 22px;
-          font-family: 'Inter', sans-serif;
-          font-size: 14px;
-          cursor: pointer;
-          transition: all 0.2s;
-        }
-        .btn-ghost:hover {
-          border-color: rgba(245,200,66,0.3);
-          color: var(--text-primary);
-        }
-
-        /* Full gallery */
-        .mockup-gallery {
-          max-width: 1600px;
-          margin: 0 auto;
-          padding: 0 40px 80px;
-        }
-        .gallery-title {
-          font-size: 1.4rem;
-          font-weight: 600;
-          color: var(--text-primary);
-          margin-bottom: 24px;
-          padding-top: 8px;
-          border-top: 1px solid var(--border);
-          padding-top: 32px;
-        }
-        .gallery-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-          gap: 16px;
-        }
-        .gallery-item {
-          border-radius: var(--radius-md);
-          overflow: hidden;
-          border: 1px solid var(--border);
-          transition: border-color 0.2s, transform 0.2s;
-          display: block;
-        }
-        .gallery-item:hover {
-          border-color: var(--border-hover);
-          transform: translateY(-2px);
-        }
-        .gallery-img {
-          width: 100%;
-          aspect-ratio: 4 / 3;
-          object-fit: cover;
-          display: block;
-        }
-
-        @media (max-width: 1024px) {
-          .detail-layout { grid-template-columns: 1fr; gap: 32px; padding: 32px 24px; }
-          .topbar { padding: 16px 24px; }
-          .mockup-gallery { padding: 0 24px 60px; }
-        }
-        @media (max-width: 480px) {
-          .detail-layout { padding: 24px 16px; }
-          .topbar { padding: 14px 16px; }
-          .mockup-gallery { padding: 0 16px 40px; }
-          .gallery-grid { grid-template-columns: 1fr 1fr; }
-        }
-      `}</style>
     </main>
   )
 }
