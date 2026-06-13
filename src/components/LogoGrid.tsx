@@ -9,10 +9,13 @@ interface LogoGridProps {
   categories: string[]
 }
 
+type Columns = 3 | 4 | 5
+
 export default function LogoGrid({ logos, categories }: LogoGridProps) {
   const [search, setSearch] = useState('')
   const [activeCategory, setActiveCategory] = useState('All')
   const [sortBy, setSortBy] = useState<'newest' | 'price-asc' | 'price-desc'>('newest')
+  const [columns, setColumns] = useState<Columns>(3)
 
   const filtered = useMemo(() => {
     let result = logos
@@ -40,6 +43,12 @@ export default function LogoGrid({ logos, categories }: LogoGridProps) {
     return result
   }, [logos, activeCategory, search, sortBy])
 
+  const colIcons: { val: Columns; label: string }[] = [
+    { val: 3, label: '⊞' },
+    { val: 4, label: '⊟' },
+    { val: 5, label: '≣' },
+  ]
+
   return (
     <section className="grid-section">
       <div className="controls">
@@ -59,6 +68,7 @@ export default function LogoGrid({ logos, categories }: LogoGridProps) {
             <button className="search-clear" onClick={() => setSearch('')}>✕</button>
           )}
         </div>
+
         <select
           value={sortBy}
           onChange={e => setSortBy(e.target.value as typeof sortBy)}
@@ -68,6 +78,21 @@ export default function LogoGrid({ logos, categories }: LogoGridProps) {
           <option value="price-asc">Price: Low → High</option>
           <option value="price-desc">Price: High → Low</option>
         </select>
+
+        {/* Column toggle */}
+        <div className="col-toggle">
+          <span className="col-label">Grid</span>
+          {colIcons.map(({ val, label }) => (
+            <button
+              key={val}
+              className={`col-btn ${columns === val ? 'active' : ''}`}
+              onClick={() => setColumns(val)}
+              title={`${val} columns`}
+            >
+              {val}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="cat-filter">
@@ -90,7 +115,7 @@ export default function LogoGrid({ logos, categories }: LogoGridProps) {
       </p>
 
       {filtered.length > 0 ? (
-        <div className="logo-grid">
+        <div className="logo-grid" style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}>
           {filtered.map(logo => (
             <LogoCard key={logo.id} logo={logo} />
           ))}
@@ -116,6 +141,7 @@ export default function LogoGrid({ logos, categories }: LogoGridProps) {
           gap: 12px;
           margin-bottom: 20px;
           flex-wrap: wrap;
+          align-items: center;
         }
         .search-wrap {
           position: relative;
@@ -159,6 +185,7 @@ export default function LogoGrid({ logos, categories }: LogoGridProps) {
           padding: 4px;
         }
         .search-clear:hover { color: var(--text-primary); }
+
         .sort-select {
           background: var(--bg-card);
           border: 1px solid var(--border);
@@ -172,6 +199,51 @@ export default function LogoGrid({ logos, categories }: LogoGridProps) {
           min-width: 180px;
         }
         .sort-select:focus { border-color: rgba(245, 200, 66, 0.35); }
+
+        /* Column toggle group */
+        .col-toggle {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          background: var(--bg-card);
+          border: 1px solid var(--border);
+          border-radius: var(--radius-md);
+          padding: 6px 10px;
+        }
+        .col-label {
+          font-size: 11px;
+          color: var(--text-muted);
+          margin-right: 6px;
+          font-family: 'Inter', sans-serif;
+          text-transform: uppercase;
+          letter-spacing: 0.06em;
+        }
+        .col-btn {
+          width: 30px;
+          height: 30px;
+          border-radius: 6px;
+          border: 1px solid transparent;
+          background: transparent;
+          color: var(--text-secondary);
+          font-family: 'Space Grotesk', sans-serif;
+          font-size: 13px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.15s;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .col-btn:hover {
+          background: rgba(255,255,255,0.06);
+          color: var(--text-primary);
+        }
+        .col-btn.active {
+          background: var(--accent-gold-dim);
+          border-color: rgba(245, 200, 66, 0.4);
+          color: var(--accent-gold);
+        }
+
         .cat-filter {
           display: flex;
           flex-wrap: wrap;
@@ -200,16 +272,18 @@ export default function LogoGrid({ logos, categories }: LogoGridProps) {
           color: var(--accent-gold);
           font-weight: 500;
         }
+
         .result-count {
           font-size: 13px;
           color: var(--text-muted);
           margin-bottom: 24px;
         }
+
         .logo-grid {
           display: grid;
-          grid-template-columns: repeat(3, 1fr);
           gap: 24px;
         }
+
         .empty-state {
           text-align: center;
           padding: 80px 20px;
@@ -221,10 +295,7 @@ export default function LogoGrid({ logos, categories }: LogoGridProps) {
           margin-bottom: 16px;
           opacity: 0.3;
         }
-        .empty-state p {
-          margin-bottom: 20px;
-          font-size: 15px;
-        }
+        .empty-state p { margin-bottom: 20px; font-size: 15px; }
         .reset-btn {
           background: var(--bg-card);
           border: 1px solid var(--border);
@@ -237,13 +308,17 @@ export default function LogoGrid({ logos, categories }: LogoGridProps) {
           transition: border-color 0.2s;
         }
         .reset-btn:hover { border-color: var(--accent-gold); }
+
         @media (max-width: 1024px) {
-          .logo-grid { grid-template-columns: repeat(2, 1fr); }
           .grid-section { padding: 0 24px 60px; }
         }
-        @media (max-width: 640px) {
+        @media (max-width: 768px) {
+          .logo-grid { grid-template-columns: repeat(2, 1fr) !important; }
+          .col-toggle { display: none; }
+        }
+        @media (max-width: 480px) {
           .grid-section { padding: 0 16px 60px; }
-          .logo-grid { grid-template-columns: 1fr; gap: 16px; }
+          .logo-grid { grid-template-columns: 1fr !important; gap: 16px; }
           .controls { flex-direction: column; }
           .sort-select { min-width: unset; width: 100%; }
         }
