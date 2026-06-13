@@ -14,7 +14,7 @@ export async function generateMetadata({ params }: { params: { id: string } }) {
   const logo = logos.find(l => l.id === params.id)
   if (!logo) return { title: 'Logo Not Found' }
   return {
-    title: `${logo.title} — LogoFolio`,
+    title: logo.title + ' — LogoFolio',
     description: logo.description.slice(0, 155),
   }
 }
@@ -23,8 +23,6 @@ export default async function LogoDetailPage({ params }: { params: { id: string 
   const logos = await fetchLogos()
   const logo = logos.find(l => l.id === params.id)
   if (!logo) notFound()
-
-  const imageUrl = getGoogleDriveImageUrl(logo.logoShow)
-
-  return <LogoDetailClient logo={logo} imageUrl={imageUrl} />
+  const imageUrl = getGoogleDriveImageUrl(logo!.logoShow)
+  return <LogoDetailClient logo={logo!} imageUrl={imageUrl} />
 }
