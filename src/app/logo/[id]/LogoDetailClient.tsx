@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, type CSSProperties } from 'react'
 import { useRouter } from 'next/navigation'
 import { Logo } from '@/lib/sheets'
 
@@ -52,12 +52,12 @@ export default function LogoDetailClient({ logo, imageUrl }: Props) {
   const priceDisplay = logo.price ? '$' + logo.price.toLocaleString() : 'Contact'
   const publishedDisplay = formatDate(logo.published)
 
-  const s = {
-    page: { minHeight: '100vh', position: 'relative', zIndex: 1 } as React.CSSProperties,
-    topbar: { maxWidth: 1600, margin: '0 auto', padding: '16px 24px', display: 'flex', alignItems: 'center', gap: 16, borderBottom: '1px solid rgba(255,255,255,0.08)' } as React.CSSProperties,
-    backBtn: { display: 'flex', alignItems: 'center', gap: 6, background: '#12121A', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, padding: '8px 14px', color: '#8A8A9A', fontFamily: 'Inter, sans-serif', fontSize: 13, cursor: 'pointer' } as React.CSSProperties,
-    markDot: { width: 7, height: 7, background: '#F5C842', borderRadius: '50%', display: 'inline-block', boxShadow: '0 0 10px rgba(245,200,66,0.5)' } as React.CSSProperties,
-    markText: { fontFamily: 'Space Grotesk, sans-serif', fontWeight: 700, fontSize: 16, letterSpacing: '-0.03em', color: '#F5F5F0' } as React.CSSProperties,
+  const s: Record<string, CSSProperties> = {
+    page: { minHeight: '100vh', position: 'relative', zIndex: 1 },
+    topbar: { maxWidth: 1600, margin: '0 auto', padding: '16px 24px', display: 'flex', alignItems: 'center', gap: 16, borderBottom: '1px solid rgba(255,255,255,0.08)' },
+    backBtn: { display: 'flex', alignItems: 'center', gap: 6, background: '#12121A', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, padding: '8px 14px', color: '#8A8A9A', fontFamily: 'Inter, sans-serif', fontSize: 13, cursor: 'pointer' },
+    markDot: { width: 7, height: 7, background: '#F5C842', borderRadius: '50%', display: 'inline-block', boxShadow: '0 0 10px rgba(245,200,66,0.5)' },
+    markText: { fontFamily: 'Space Grotesk, sans-serif', fontWeight: 700, fontSize: 16, letterSpacing: '-0.03em', color: '#F5F5F0' },
   }
 
   return (
