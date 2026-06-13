@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Logo, getGoogleDriveImageUrl } from '@/lib/sheets'
 
 interface LogoCardProps {
@@ -8,23 +9,51 @@ interface LogoCardProps {
 }
 
 export default function LogoCard({ logo }: LogoCardProps) {
-  const [showMockup, setShowMockup] = useState(false)
+  const router = useRouter()
   const [imgError, setImgError] = useState(false)
+  const [mockupImages, setMockupImages] = useState<{ id: string; thumbnailUrl: string }[]>([])
+  const [showMockup, setShowMockup] = useState(false)
+  const [loadingMockup, setLoadingMockup] = useState(false)
 
   const imageUrl = getGoogleDriveImageUrl(logo.logoShow)
-  const mockupFolderUrl = logo.mockups
+  const priceDisplay = logo.price ? `$${logo.price.toLocaleString()}` : 'Contact'
+  const allCategories = [logo.mainCategory, ...logo.secondCategories].filter(Boolean).slice(0, 3)
 
-  const priceDisplay = logo.price
-    ? `$${logo.price.toLocaleString()}`
-    : 'Contact'
+  const handleToggleMockup = async (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (showMockup) {
+      setShowMockup(false)
+      return
+    }
+    if (mockupImages.length > 0) {
+      setShowMockup(true)
+      return
+    }
+    if (!logo.mockupFolderId) return
+    setLoadingMockup(true)
+    try {
+      const res = await fetch(`/api/mockups?folderId=${logo.mockupFolderId}`)
+      const data = await res.json()
+      setMockupImages(data.images || [])
+      setShowMockup(true)
+    } catch {
+      console.error('Failed to load mockups')
+    } finally {
+      setLoadingMockup(false)
+    }
+  }
 
-  const allCategories = [
-    logo.mainCategory,
-    ...logo.secondCategories,
-  ].filter(Boolean).slice(0, 3)
+  const handleCardClick = () => {
+    router.push(`/logo/${logo.id}`)
+  }
+
+  const handleViewLogo = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (logo.logoUrl) window.open(logo.logoUrl, '_blank')
+  }
 
   return (
-    <article className="logo-card">
+    <article className="logo-card" onClick={handleCardClick}>
       <div className="card-image-wrap">
         {!imgError && imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -40,30 +69,55 @@ export default function LogoCard({ logo }: LogoCardProps) {
             <span>{logo.title.charAt(0)}</span>
           </div>
         )}
-        <div className="card-shimmer" />
-        <div className="card-overlay">
-          <div className="card-actions">
-            {logo.logoUrl && (
-              <a
-                href={logo.logoUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn-primary"
-              >
-                View Logo
-              </a>
-            )}
-            {mockupFolderUrl && (
-              <button
-                className="btn-ghost"
-                onClick={() => setShowMockup(!showMockup)}
-              >
-                {showMockup ? 'Hide' : 'Mockups'}
-              </button>
-            )}
-          </div>
+
+        {/* Action buttons — muncul di pojok tanpa overlay gelap */}
+        <div className="card-actions">
+          {logo.logoUrl && (
+            <button className="btn-action btn-view" onClick={handleViewLogo} title="View on LogoGround">
+              <svg viewBox="0 0 16 16" fill="none" width="13" height="13">
+                <path d="M6 3H3a1 1 0 00-1 1v9a1 1 0 001 1h9a1 1 0 001-1v-3M10 2h4m0 0v4m0-4L7 9" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              View
+            </button>
+          )}
+          {logo.mockupFolderId && (
+            <button
+              className={`btn-action btn-mockup ${showMockup ? 'active' : ''}`}
+              onClick={handleToggleMockup}
+              title="Toggle mockups"
+            >
+              {loadingMockup ? (
+                <span className="spinner" />
+              ) : (
+                <svg viewBox="0 0 16 16" fill="none" width="13" height="13">
+                  <rect x="1" y="3" width="10" height="7" rx="1" stroke="currentColor" strokeWidth="1.4"/>
+                  <path d="M4 13h8M11 6h3v7H6v-3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
+                </svg>
+              )}
+              {showMockup ? 'Hide' : 'Mockup'}
+            </button>
+          )}
         </div>
       </div>
+
+      {/* Mockup strip */}
+      {showMockup && mockupImages.length > 0 && (
+        <div className="mockup-strip" onClick={e => e.stopPropagation()}>
+          {mockupImages.map(img => (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              key={img.id}
+              src={img.thumbnailUrl}
+              alt="mockup"
+              className="mockup-thumb"
+              loading="lazy"
+            />
+          ))}
+        </div>
+      )}
+      {showMockup && mockupImages.length === 0 && !loadingMockup && (
+        <div className="mockup-empty">No mockup images found</div>
+      )}
 
       <div className="card-body">
         <div className="card-cats">
@@ -86,8 +140,7 @@ export default function LogoCard({ logo }: LogoCardProps) {
           border-radius: var(--radius-lg);
           overflow: hidden;
           transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
-          position: relative;
-          cursor: default;
+          cursor: pointer;
         }
         .logo-card:hover {
           border-color: var(--border-hover);
@@ -124,74 +177,96 @@ export default function LogoCard({ logo }: LogoCardProps) {
           background: linear-gradient(135deg, #0D0D15, #14141F);
         }
 
-        /* Golden shimmer sweep on hover */
-        .card-shimmer {
-          position: absolute;
-          inset: 0;
-          background: linear-gradient(
-            105deg,
-            transparent 30%,
-            rgba(245, 200, 66, 0.08) 50%,
-            transparent 70%
-          );
-          opacity: 0;
-          transform: translateX(-100%);
-          transition: none;
-          pointer-events: none;
-        }
-        .logo-card:hover .card-shimmer {
-          opacity: 1;
-          transform: translateX(100%);
-          transition: transform 0.6s ease, opacity 0.3s ease;
-        }
-
-        .card-overlay {
-          position: absolute;
-          inset: 0;
-          background: var(--bg-overlay);
-          display: flex;
-          align-items: flex-end;
-          padding: 16px;
-          opacity: 0;
-          transition: opacity 0.25s ease;
-        }
-        .logo-card:hover .card-overlay {
-          opacity: 1;
-        }
-
+        /* Action buttons pojok kanan atas — tanpa overlay gelap */
         .card-actions {
+          position: absolute;
+          top: 10px;
+          right: 10px;
           display: flex;
-          gap: 8px;
-          width: 100%;
+          gap: 6px;
+          opacity: 0;
+          transform: translateY(-4px);
+          transition: opacity 0.2s ease, transform 0.2s ease;
         }
-        .btn-primary {
-          flex: 1;
-          background: var(--gradient-gold);
-          color: #0A0A0F;
-          border: none;
-          border-radius: var(--radius-sm);
-          padding: 9px 14px;
-          font-family: 'Space Grotesk', sans-serif;
-          font-weight: 600;
-          font-size: 13px;
-          cursor: pointer;
-          text-align: center;
-          transition: opacity 0.2s;
+        .logo-card:hover .card-actions {
+          opacity: 1;
+          transform: translateY(0);
         }
-        .btn-primary:hover { opacity: 0.88; }
-        .btn-ghost {
-          background: rgba(255,255,255,0.08);
-          color: var(--text-primary);
-          border: 1px solid rgba(255,255,255,0.12);
-          border-radius: var(--radius-sm);
-          padding: 9px 14px;
+        .btn-action {
+          display: flex;
+          align-items: center;
+          gap: 5px;
+          padding: 6px 10px;
+          border-radius: 6px;
           font-family: 'Inter', sans-serif;
-          font-size: 13px;
+          font-size: 11px;
+          font-weight: 500;
           cursor: pointer;
+          border: none;
+          backdrop-filter: blur(8px);
           transition: background 0.2s;
           white-space: nowrap;
         }
-        .btn-ghost:hover { background: rgba(255,255,255,0.14); }
+        .btn-view {
+          background: rgba(245, 200, 66, 0.9);
+          color: #0A0A0F;
+        }
+        .btn-view:hover { background: rgba(245, 200, 66, 1); }
+        .btn-mockup {
+          background: rgba(20, 20, 30, 0.85);
+          color: var(--text-primary);
+          border: 1px solid rgba(255,255,255,0.15);
+        }
+        .btn-mockup:hover { background: rgba(40, 40, 55, 0.95); }
+        .btn-mockup.active {
+          background: rgba(79, 142, 247, 0.25);
+          border-color: rgba(79, 142, 247, 0.5);
+          color: var(--accent-blue);
+        }
+
+        .spinner {
+          width: 10px;
+          height: 10px;
+          border: 1.5px solid rgba(255,255,255,0.2);
+          border-top-color: var(--text-primary);
+          border-radius: 50%;
+          animation: spin 0.6s linear infinite;
+          display: inline-block;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Mockup horizontal scroll strip */
+        .mockup-strip {
+          display: flex;
+          gap: 8px;
+          overflow-x: auto;
+          padding: 10px 12px;
+          background: #0D0D15;
+          border-top: 1px solid var(--border);
+          scrollbar-width: thin;
+          scrollbar-color: var(--text-muted) transparent;
+        }
+        .mockup-strip::-webkit-scrollbar { height: 3px; }
+        .mockup-strip::-webkit-scrollbar-thumb { background: var(--text-muted); border-radius: 2px; }
+        .mockup-thumb {
+          height: 72px;
+          width: auto;
+          border-radius: 6px;
+          object-fit: cover;
+          flex-shrink: 0;
+          border: 1px solid var(--border);
+          transition: transform 0.2s;
+          cursor: zoom-in;
+        }
+        .mockup-thumb:hover { transform: scale(1.05); }
+        .mockup-empty {
+          padding: 12px 16px;
+          font-size: 12px;
+          color: var(--text-muted);
+          background: #0D0D15;
+          border-top: 1px solid var(--border);
+          text-align: center;
+        }
 
         .card-body {
           padding: 16px;
