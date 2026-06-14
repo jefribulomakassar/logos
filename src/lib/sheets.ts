@@ -13,6 +13,29 @@ export interface Logo {
   published: string
 }
 
+export function formatDate(raw: string): string {
+  if (!raw) return ''
+  // Date(YYYY,MM,D) format dari Google Sheets gviz
+  const dateMatch = raw.match(/^Date\((\d+),(\d+),(\d+)\)/)
+  if (dateMatch) {
+    const y = dateMatch[1]
+    const m = String(Number(dateMatch[2]) + 1).padStart(2, '0')
+    const d = String(dateMatch[3]).padStart(2, '0')
+    return y + '-' + m + '-' + d
+  }
+  // DD/MM/YYYY
+  const slashMatch = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/)
+  if (slashMatch) {
+    const y = slashMatch[3]
+    const m = slashMatch[2].padStart(2, '0')
+    const d = slashMatch[1].padStart(2, '0')
+    return y + '-' + m + '-' + d
+  }
+  // YYYY-MM-DD sudah benar
+  if (/^\d{4}-\d{2}-\d{2}/.test(raw)) return raw.slice(0, 10)
+  return raw
+}
+
 const SHEET_ID = '1PzZUFsoWL2wAvJGjBIzBpO_2lwRHbBSicys01rEDU_I'
 
 export function getGoogleDriveImageUrl(driveUrl: string): string {
@@ -66,7 +89,7 @@ export async function fetchLogos(): Promise<Logo[]> {
           mockupFolderId: extractFolderId(String(cell(8))),
           logoUrl: String(cell(9)),
           creator: String(cell(10)),
-          published: String(cell(11)),
+          published: formatDate(String(cell(11))),
         }
       })
   } catch (err) {
