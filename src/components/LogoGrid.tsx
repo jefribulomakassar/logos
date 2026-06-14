@@ -96,15 +96,15 @@ export default function LogoGrid({ logos, categories }: LogoGridProps) {
       </div>
 
       <div className="cat-filter">
-        {['All', ...categories].map(cat => (
-          <button
-            key={cat}
-            onClick={() => setActiveCategory(cat)}
-            className={`cat-btn ${activeCategory === cat ? 'active' : ''}`}
-          >
-            {cat}
-          </button>
-        ))}
+        <select
+          value={activeCategory}
+          onChange={e => setActiveCategory(e.target.value)}
+          className="cat-select"
+        >
+          {['All', ...categories].map(cat => (
+            <option key={cat} value={cat}>{cat}</option>
+          ))}
+        </select>
       </div>
 
       <p className="result-count">
@@ -245,11 +245,24 @@ export default function LogoGrid({ logos, categories }: LogoGridProps) {
         }
 
         .cat-filter {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 8px;
           margin-bottom: 24px;
         }
+        .cat-select {
+          background: var(--bg-card);
+          border: 1px solid var(--border);
+          border-radius: var(--radius-md);
+          padding: 11px 14px;
+          color: var(--text-primary);
+          font-family: 'Inter', sans-serif;
+          font-size: 14px;
+          outline: none;
+          cursor: pointer;
+          min-width: 220px;
+          width: 100%;
+          max-width: 320px;
+        }
+        .cat-select:focus { border-color: rgba(245, 200, 66, 0.35); }
+        .cat-select option { background: #12121A; color: #F5F5F0; }
         .cat-btn {
           background: var(--bg-card);
           border: 1px solid var(--border);
