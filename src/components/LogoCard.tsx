@@ -3,6 +3,8 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Logo, getGoogleDriveImageUrl } from '@/lib/sheets'
+import { useFavorites } from './FavoritesProvider'
+import { useSession, signIn } from 'next-auth/react'
 
 interface LogoCardProps {
   logo: Logo
