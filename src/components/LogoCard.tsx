@@ -21,6 +21,19 @@ export default function LogoCard({ logo }: LogoCardProps) {
   const priceDisplay = logo.price ? `$${logo.price.toLocaleString()}` : 'Contact'
   const allCategories = [logo.mainCategory, ...logo.secondCategories].filter(Boolean).slice(0, 3)
 
+  const { favorites, toggleFavorite } = useFavorites()
+  const { data: session } = useSession()
+  const isLiked = favorites.includes(logo.id)
+
+  const handleLike = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (!session?.user) {
+      signIn('google')
+      return
+    }
+    toggleFavorite(logo.id, logo.title)
+  }
+
   const handleToggleMockup = async (e: React.MouseEvent) => {
     e.stopPropagation()
     if (showMockup) {
