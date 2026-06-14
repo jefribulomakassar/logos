@@ -85,6 +85,17 @@ export default function LogoCard({ logo }: LogoCardProps) {
           </div>
         )}
 
+        {/* Like button — pojok kiri atas */}
+        <button
+          className={'like-btn' + (isLiked ? ' liked' : '')}
+          onClick={handleLike}
+          title={session ? (isLiked ? 'Unlike' : 'Like') : 'Sign in to like'}
+        >
+          <svg viewBox="0 0 16 16" fill={isLiked ? 'currentColor' : 'none'} width="14" height="14">
+            <path d="M8 13.5S1.5 9.5 1.5 5.5a3.5 3.5 0 016.5-1.8A3.5 3.5 0 0114.5 5.5c0 4-6.5 8-6.5 8z" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </button>
+
         {/* Action buttons — muncul di pojok tanpa overlay gelap */}
         <div className="card-actions">
           {logo.logoUrl && (
@@ -161,6 +172,32 @@ export default function LogoCard({ logo }: LogoCardProps) {
           border-color: var(--border-hover);
           box-shadow: var(--shadow-card), var(--shadow-glow);
           transform: translateY(-3px);
+        }
+        .like-btn {
+          position: absolute;
+          top: 10px; left: 10px;
+          width: 32px; height: 32px;
+          border-radius: 50%;
+          background: rgba(20,20,30,0.85);
+          border: 1px solid rgba(255,255,255,0.15);
+          color: var(--text-muted);
+          display: flex; align-items: center; justify-content: center;
+          cursor: pointer;
+          backdrop-filter: blur(8px);
+          transition: all 0.2s;
+          opacity: 0;
+        }
+        .logo-card:hover .like-btn { opacity: 1; }
+        .like-btn.liked {
+          opacity: 1;
+          color: #FF4D6D;
+          border-color: rgba(255,77,109,0.4);
+          background: rgba(255,77,109,0.15);
+        }
+        .like-btn:hover {
+          transform: scale(1.1);
+          color: #FF4D6D;
+          border-color: rgba(255,77,109,0.4);
         }
 
         .card-image-wrap {
