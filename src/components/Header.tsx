@@ -234,7 +234,7 @@ export default function Header({ logoCount, hasActiveSale, saleEndDate }: {
         .sale-lightning { font-size: 14px; }
         .sale-text {
           font-family: 'Inter', sans-serif;
-          font-size: 13px;
+          font-size: 36px;
           color: var(--text-secondary);
           flex: 1;
         }
