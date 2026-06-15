@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Logo, getGoogleDriveImageUrl } from '@/lib/sheets'
+import { Logo, getGoogleDriveImageUrl, getEffectivePrice } from '@/lib/sheets'
 import { useFavorites } from './FavoritesProvider'
 import { useSession, signIn } from 'next-auth/react'
 
@@ -18,7 +18,9 @@ export default function LogoCard({ logo }: LogoCardProps) {
   const [loadingMockup, setLoadingMockup] = useState(false)
 
   const imageUrl = getGoogleDriveImageUrl(logo.logoShow)
-  const priceDisplay = logo.price ? `$${logo.price.toLocaleString()}` : 'Contact'
+  const { price: effectivePrice, isSpecial } = getEffectivePrice(logo)
+  // const priceDisplay = logo.price ? `$${logo.price.toLocaleString()}` : 'Contact'
+  const priceDisplay = effectivePrice ? '$' + effectivePrice.toLocaleString() : 'Contact'
   const allCategories = [logo.mainCategory, ...logo.secondCategories].filter(Boolean).slice(0, 3)
 
   const { favorites, toggleFavorite } = useFavorites()
@@ -154,7 +156,17 @@ export default function LogoCard({ logo }: LogoCardProps) {
         <h3 className="card-title">{logo.title}</h3>
         <p className="card-desc">{logo.description}</p>
         <div className="card-footer">
-          <span className="card-price">{priceDisplay}</span>
+          <div className="price-wrap">
+            {isSpecial && (
+              <span className="price-original">${logo.price.toLocaleString()}</span>
+            )}
+            <span className="card-price" style={{ color: isSpecial ? '#FF4D6D' : 'var(--accent-gold)' }}>
+              {priceDisplay}
+            </span>
+            {isSpecial && (
+              <span className="price-badge">SALE</span>
+            )}
+          </div>
           <span className="card-creator">by {logo.creator}</span>
         </div>
       </div>
@@ -172,6 +184,33 @@ export default function LogoCard({ logo }: LogoCardProps) {
           border-color: var(--border-hover);
           box-shadow: var(--shadow-card), var(--shadow-glow);
           transform: translateY(-3px);
+        }
+        .price-wrap {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          flex-wrap: wrap;
+        }
+        .price-original {
+          font-size: 12px;
+          color: var(--text-muted);
+          text-decoration: line-through;
+          font-family: 'Space Grotesk', sans-serif;
+        }
+        .card-price {
+          font-family: 'Space Grotesk', sans-serif;
+          font-weight: 700;
+          font-size: 16px;
+        }
+        .price-badge {
+          font-size: 9px;
+          font-weight: 700;
+          letter-spacing: 0.08em;
+          color: #FF4D6D;
+          background: rgba(255,77,109,0.15);
+          border: 1px solid rgba(255,77,109,0.3);
+          padding: 2px 6px;
+          border-radius: 4px;
         }
         .like-btn {
           position: absolute;
