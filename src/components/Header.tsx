@@ -2,7 +2,11 @@
 
 import { useSession, signIn, signOut } from 'next-auth/react'
 
-export default function Header({ logoCount }: { logoCount: number }) {
+export default function Header({ logoCount, hasActiveSale, saleEndDate }: { 
+  logoCount: number
+  hasActiveSale?: boolean
+  saleEndDate?: string
+}) {
   const { data: session } = useSession()
 
   return (
@@ -39,6 +43,18 @@ export default function Header({ logoCount }: { logoCount: number }) {
           )}
         </div>
       </div>
+
+      {hasActiveSale && (
+        <div className="sale-banner">
+          <span className="sale-lightning">⚡</span>
+          <span className="sale-text">
+            Special Price — All logos from <strong>$300</strong>
+          </span>
+          {saleEndDate && (
+            <span className="sale-until">Until {saleEndDate}</span>
+          )}
+        </div>
+      )}
 
       {/* Hero */}
       <div className="hero">
@@ -195,6 +211,47 @@ export default function Header({ logoCount }: { logoCount: number }) {
           .header-inner { padding: 16px 16px; }
           .hero { padding: 32px 16px 40px; }
           .user-name { display: none; }
+        }
+        .sale-banner {
+          max-width: 1600px;
+          margin: 0 auto 0;
+          padding: 0 40px;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+        .sale-banner > div {
+          width: 100%;
+          background: rgba(245,200,66,0.08);
+          border: 1px solid rgba(245,200,66,0.25);
+          border-radius: var(--radius-md);
+          padding: 10px 20px;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          flex-wrap: wrap;
+        }
+        .sale-lightning { font-size: 14px; }
+        .sale-text {
+          font-family: 'Inter', sans-serif;
+          font-size: 13px;
+          color: var(--text-secondary);
+          flex: 1;
+        }
+        .sale-text strong {
+          color: var(--accent-gold);
+          font-weight: 600;
+        }
+        .sale-until {
+          font-size: 12px;
+          color: var(--text-muted);
+          background: rgba(245,200,66,0.08);
+          border: 1px solid rgba(245,200,66,0.15);
+          padding: 3px 10px;
+          border-radius: 100px;
+        }
+        @media (max-width: 768px) {
+          .sale-banner { padding: 0 16px; }
         }
       `}</style>
     </header>
