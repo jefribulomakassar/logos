@@ -70,7 +70,7 @@ export default function LogoCard({ logo }: LogoCardProps) {
   }
 
   return (
-    <article className={'logo-card' + (isSpecial ? ' on-sale' : '')} onClick={handleCardClick} onClick={handleCardClick}>
+    <article className={'logo-card' + (isSpecial ? ' on-sale' : '')} onClick={handleCardClick}>
       <div className="card-image-wrap">
         {!imgError && imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
