@@ -23,6 +23,9 @@ export function getEffectivePrice(logo: Logo): { price: number; isSpecial: boole
   const now = new Date()
   const start = parseDate(logo.startOn)
   const end = parseDate(logo.endOn)
+
+  console.log('price check:', logo.title, { now, start, end, specialPrice: logo.specialPrice })
+
   if (start && end && now >= start && now <= end) {
     return { price: logo.specialPrice, isSpecial: true }
   }
@@ -31,14 +34,31 @@ export function getEffectivePrice(logo: Logo): { price: number; isSpecial: boole
 
 function parseDate(raw: string): Date | null {
   if (!raw) return null
-  // MM/DD/YYYY
-  const slashMatch = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/)
-  if (slashMatch) {
-    return new Date(Number(slashMatch[3]), Number(slashMatch[1]) - 1, Number(slashMatch[2]))
+
+  // Format dari gviz: Date(2026,5,15) — bulan 0-indexed
+  const gvizMatch = raw.match(/^Date\((\d+),(\d+),(\d+)\)/)
+  if (gvizMatch) {
+    return new Date(Number(gvizMatch[1]), Number(gvizMatch[2]), Number(gvizMatch[3]))
   }
+
+  // MM/DD/YYYY
+  const mdyMatch = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/)
+  if (mdyMatch) {
+    return new Date(Number(mdyMatch[3]), Number(mdyMatch[1]) - 1, Number(mdyMatch[2]))
+  }
+
+  // DD/MM/YYYY
+  const dmyMatch = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/)
+  if (dmyMatch) {
+    return new Date(Number(dmyMatch[3]), Number(dmyMatch[2]) - 1, Number(dmyMatch[1]))
+  }
+
   // YYYY-MM-DD
-  const d = new Date(raw)
-  if (!isNaN(d.getTime())) return d
+  const isoMatch = raw.match(/^(\d{4})-(\d{2})-(\d{2})/)
+  if (isoMatch) {
+    return new Date(Number(isoMatch[1]), Number(isoMatch[2]) - 1, Number(isoMatch[3]))
+  }
+
   return null
 }
 
@@ -111,8 +131,8 @@ export async function fetchLogos(): Promise<Logo[]> {
           keywords: String(cell(3)),
           price: Number(cell(4)) || 0,
           specialPrice: cell(5) ? Number(cell(5)) : null,
-          startOn: formatDate(String(cell(6))),
-          endOn: formatDate(String(cell(7))),
+          startOn: String(cell(6)),
+          endOn: String(cell(7)),
           mainCategory: String(cell(8)),
           secondCategories: secondCatRaw
             ? secondCatRaw.split(',').map((s: string) => s.trim()).filter(Boolean)
