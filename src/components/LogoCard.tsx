@@ -19,7 +19,7 @@ export default function LogoCard({ logo }: LogoCardProps) {
 
   const imageUrl = getGoogleDriveImageUrl(logo.logoShow)
   const { price: effectivePrice, isSpecial } = getEffectivePrice(logo)
-  // const priceDisplay = logo.price ? `$${logo.price.toLocaleString()}` : 'Contact'
+  const savedAmount = isSpecial ? logo.price - effectivePrice : 0
   const priceDisplay = effectivePrice ? '$' + effectivePrice.toLocaleString() : 'Contact'
   const allCategories = [logo.mainCategory, ...logo.secondCategories].filter(Boolean).slice(0, 3)
 
@@ -70,7 +70,7 @@ export default function LogoCard({ logo }: LogoCardProps) {
   }
 
   return (
-    <article className="logo-card" onClick={handleCardClick}>
+    <article className={'logo-card' + (isSpecial ? ' on-sale' : '')} onClick={handleCardClick} onClick={handleCardClick}>
       <div className="card-image-wrap">
         {!imgError && imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -160,11 +160,11 @@ export default function LogoCard({ logo }: LogoCardProps) {
             {isSpecial && (
               <span className="price-original">${logo.price.toLocaleString()}</span>
             )}
-            <span className="card-price" style={{ color: isSpecial ? '#FF4D6D' : 'var(--accent-gold)' }}>
+            <span className="card-price" style={{ color: isSpecial ? '#F5C842' : 'var(--accent-gold)' }}>
               {priceDisplay}
             </span>
-            {isSpecial && (
-              <span className="price-badge">SALE</span>
+            {isSpecial && savedAmount > 0 && (
+              <span className="save-badge">Save ${savedAmount}</span>
             )}
           </div>
           <span className="card-creator">by {logo.creator}</span>
@@ -180,6 +180,14 @@ export default function LogoCard({ logo }: LogoCardProps) {
           transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
           cursor: pointer;
         }
+        .logo-card.on-sale {
+          border-color: rgba(245,200,66,0.35);
+          box-shadow: 0 0 20px rgba(245,200,66,0.08);
+        }
+        .logo-card.on-sale:hover {
+          border-color: rgba(245,200,66,0.7);
+          box-shadow: 0 4px 24px rgba(0,0,0,0.4), 0 0 30px rgba(245,200,66,0.18);
+        }
         .logo-card:hover {
           border-color: var(--border-hover);
           box-shadow: var(--shadow-card), var(--shadow-glow);
@@ -191,16 +199,27 @@ export default function LogoCard({ logo }: LogoCardProps) {
           gap: 6px;
           flex-wrap: wrap;
         }
+        .card-price {
+          font-family: 'Space Grotesk', sans-serif;
+          font-weight: 700;
+          font-size: 16px;
+          color: var(--accent-gold);
+        }
         .price-original {
           font-size: 12px;
           color: var(--text-muted);
           text-decoration: line-through;
           font-family: 'Space Grotesk', sans-serif;
         }
-        .card-price {
-          font-family: 'Space Grotesk', sans-serif;
-          font-weight: 700;
-          font-size: 16px;
+        .save-badge {
+          font-size: 9px;
+          font-weight: 600;
+          letter-spacing: 0.06em;
+          color: #F5C842;
+          background: rgba(245,200,66,0.12);
+          border: 1px solid rgba(245,200,66,0.3);
+          padding: 2px 7px;
+          border-radius: 4px;
         }
         .price-badge {
           font-size: 9px;
