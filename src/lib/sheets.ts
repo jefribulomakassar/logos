@@ -4,6 +4,9 @@ export interface Logo {
   description: string
   keywords: string
   price: number
+  specialPrice: number | null
+  startOn: string
+  endOn: string
   mainCategory: string
   secondCategories: string[]
   logoShow: string
@@ -11,6 +14,32 @@ export interface Logo {
   logoUrl: string
   creator: string
   published: string
+}
+
+export function getEffectivePrice(logo: Logo): { price: number; isSpecial: boolean } {
+  if (!logo.specialPrice || !logo.startOn || !logo.endOn) {
+    return { price: logo.price, isSpecial: false }
+  }
+  const now = new Date()
+  const start = parseDate(logo.startOn)
+  const end = parseDate(logo.endOn)
+  if (start && end && now >= start && now <= end) {
+    return { price: logo.specialPrice, isSpecial: true }
+  }
+  return { price: logo.price, isSpecial: false }
+}
+
+function parseDate(raw: string): Date | null {
+  if (!raw) return null
+  // MM/DD/YYYY
+  const slashMatch = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/)
+  if (slashMatch) {
+    return new Date(Number(slashMatch[3]), Number(slashMatch[1]) - 1, Number(slashMatch[2]))
+  }
+  // YYYY-MM-DD
+  const d = new Date(raw)
+  if (!isNaN(d.getTime())) return d
+  return null
 }
 
 export function formatDate(raw: string): string {
@@ -74,22 +103,25 @@ export async function fetchLogos(): Promise<Logo[]> {
       .filter(row => row.c && row.c[0]?.v != null)
       .map(row => {
         const cell = (i: number) => row.c[i]?.v ?? ''
-        const secondCatRaw = String(cell(6))
+        const secondCatRaw = String(cell(9)) // geser dari 6 ke 9
         return {
           id: String(cell(0)),
           title: String(cell(1)),
           description: String(cell(2)),
           keywords: String(cell(3)),
           price: Number(cell(4)) || 0,
-          mainCategory: String(cell(5)),
+          specialPrice: cell(5) ? Number(cell(5)) : null,
+          startOn: formatDate(String(cell(6))),
+          endOn: formatDate(String(cell(7))),
+          mainCategory: String(cell(8)),
           secondCategories: secondCatRaw
-            ? secondCatRaw.split(',').map(s => s.trim()).filter(Boolean)
+            ? secondCatRaw.split(',').map((s: string) => s.trim()).filter(Boolean)
             : [],
-          logoShow: String(cell(7)),
-          mockupFolderId: extractFolderId(String(cell(8))),
-          logoUrl: String(cell(9)),
-          creator: String(cell(10)),
-          published: formatDate(String(cell(11))),
+          logoShow: String(cell(10)),
+          mockupFolderId: extractFolderId(String(cell(11))),
+          logoUrl: String(cell(12)),
+          creator: String(cell(13)),
+          published: formatDate(String(cell(14))),
         }
       })
   } catch (err) {
