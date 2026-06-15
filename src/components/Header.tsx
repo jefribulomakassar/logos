@@ -243,7 +243,7 @@ export default function Header({ logoCount, hasActiveSale, saleEndDate }: {
           font-weight: 600;
         }
         .sale-until {
-          font-size: 12px;
+          font-size: 29px;
           color: var(--text-muted);
           background: rgba(245,200,66,0.08);
           border: 1px solid rgba(245,200,66,0.15);
