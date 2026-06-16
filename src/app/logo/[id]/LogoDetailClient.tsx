@@ -47,7 +47,8 @@ export default function LogoDetailClient({ logo, imageUrl }: Props) {
   }, [logo.mockupFolderId])
 
   const allCategories = [logo.mainCategory, ...logo.secondCategories].filter(Boolean)
-  const priceDisplay = logo.price ? '$' + logo.price.toLocaleString() : 'Contact'
+  const priceDisplay = '$300'
+  // const priceDisplay = logo.price ? '$' + logo.price.toLocaleString() : 'Contact'
   const publishedDisplay = formatDate(logo.published)
 
   return (
