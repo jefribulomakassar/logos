@@ -3,7 +3,7 @@ import './globals.css'
 import Providers from '@/components/Providers'
 
 export const metadata: Metadata = {
-  title: 'LogoFolio — Premium Logo Showcase by jeflodesign',
+  title: 'VibeLogos — Premium Logo Showcase by jeflodesign',
   description: 'Browse and acquire premium, hand-crafted logos across technology, animals, general, and more categories.',
   keywords: 'logo design, premium logos, brand identity, logo marketplace, jeflodesign',
 }
