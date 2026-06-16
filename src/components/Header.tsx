@@ -143,7 +143,7 @@ export default function Header({ logoCount, hasActiveSale, saleEndDate }: {
             <div className="marquee-track">
               {Array.from({ length: 6 }).map((_, i) => (
                 <span key={i} className="marquee-item">
-                  ⚡ Special Price — All logos now from <strong>$300</strong> &nbsp;·&nbsp; Limited time offer &nbsp;·&nbsp; Grab yours before it ends &nbsp;&nbsp;&nbsp;
+                  ⚡ Special Price — All logos now only <strong>$300</strong> &nbsp;·&nbsp; Limited time offer &nbsp;·&nbsp; Grab yours before it ends &nbsp;&nbsp;&nbsp;
                 </span>
               ))}
             </div>
@@ -200,7 +200,7 @@ export default function Header({ logoCount, hasActiveSale, saleEndDate }: {
         {hasActiveSale && (
           <div className="hero-sale">
             <span className="hero-sale-icon">✦</span>
-            All logos now from <strong>$300</strong> — special price this month only
+            All logos now only <strong>$300</strong> — special price this month only
           </div>
         )}
         <p className="hero-sub">
