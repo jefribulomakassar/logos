@@ -326,12 +326,11 @@ export default function LogoGrid({ logos, categories }: LogoGridProps) {
           .grid-section { padding: 0 24px 60px; }
         }
         @media (max-width: 768px) {
-          .logo-grid { grid-template-columns: repeat(2, 1fr) !important; }
+          .logo-grid { grid-template-columns: 1fr !important; gap: 16px; }
           .col-toggle { display: none; }
         }
         @media (max-width: 480px) {
           .grid-section { padding: 0 16px 60px; }
-          .logo-grid { grid-template-columns: 1fr !important; gap: 16px; }
           .controls { flex-direction: column; }
           .sort-select { min-width: unset; width: 100%; }
         }
