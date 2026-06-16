@@ -80,7 +80,7 @@ export default function Header({ logoCount, hasActiveSale, saleEndDate }: {
       <div className="header-inner">
         <div className="logo-mark">
           <span className="mark-dot" />
-          <span className="mark-text">LogoFolio</span>
+          <span className="mark-text">VibeLogos</span>
         </div>
 
         <div className="header-right">
