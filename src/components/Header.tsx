@@ -24,28 +24,103 @@ function CountdownTimer({ endDate }: { endDate: string }) {
     return () => clearInterval(id)
   }, [endDate])
 
+  const units = [
+    { val: timeLeft.days, label: 'Days' },
+    { val: timeLeft.hours, label: 'Hrs' },
+    { val: timeLeft.mins, label: 'Min' },
+    { val: timeLeft.secs, label: 'Sec' },
+  ]
+
   return (
-    <div className="countdown">
-      {[
-        { val: timeLeft.days, label: 'Days' },
-        { val: timeLeft.hours, label: 'Hrs' },
-        { val: timeLeft.mins, label: 'Min' },
-        { val: timeLeft.secs, label: 'Sec' },
-      ].map(({ val, label }, i) => (
-        <span key={label}>
-          {i > 0 && <span className="countdown-sep">:</span>}
-          <span className="countdown-box">
-            <span className="countdown-num">{String(val).padStart(2, '0')}</span>
-            <span className="countdown-label">{label}</span>
+    <div className="countdown-wrapper">
+      <span className="countdown-label-outer">Ends in</span>
+      <div className="countdown">
+        {units.map(({ val, label }, i) => (
+          <span key={label} className="countdown-unit-wrap">
+            {i > 0 && <span className="countdown-sep">:</span>}
+            <span className="countdown-box">
+              <span className="countdown-num">{String(val).padStart(2, '0')}</span>
+              <span className="countdown-unit-label">{label}</span>
+            </span>
           </span>
-        </span>
-      ))}
+        ))}
+      </div>
       <style jsx>{`
-        .countdown { display: flex; align-items: center; gap: 2px; }
-        .countdown-sep { color: var(--accent-gold); font-weight: 700; padding: 0 2px; font-size: 14px; }
-        .countdown-box { display: flex; flex-direction: column; align-items: center; background: rgba(245,200,66,0.12); border: 1px solid rgba(245,200,66,0.25); border-radius: 5px; padding: 2px 7px; min-width: 36px; }
-        .countdown-num { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 14px; color: var(--accent-gold); line-height: 1.2; }
-        .countdown-label { font-size: 8px; color: var(--text-muted); letter-spacing: 0.06em; text-transform: uppercase; }
+        .countdown-wrapper {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          background: rgba(245, 200, 66, 0.07);
+          border: 1px solid rgba(245, 200, 66, 0.22);
+          border-radius: 12px;
+          padding: 8px 14px;
+          backdrop-filter: blur(6px);
+        }
+        .countdown-label-outer {
+          font-family: 'Inter', sans-serif;
+          font-size: 10px;
+          font-weight: 600;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+          color: var(--text-muted);
+          white-space: nowrap;
+        }
+        .countdown {
+          display: flex;
+          align-items: center;
+          gap: 3px;
+        }
+        .countdown-unit-wrap {
+          display: flex;
+          align-items: center;
+          gap: 3px;
+        }
+        .countdown-sep {
+          color: rgba(245, 200, 66, 0.5);
+          font-weight: 700;
+          font-size: 16px;
+          line-height: 1;
+          padding-bottom: 8px;
+          display: inline-block;
+        }
+        .countdown-box {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          background: rgba(245, 200, 66, 0.1);
+          border: 1px solid rgba(245, 200, 66, 0.2);
+          border-radius: 8px;
+          padding: 5px 9px 4px;
+          min-width: 42px;
+          position: relative;
+          overflow: hidden;
+        }
+        .countdown-box::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 1px;
+          background: linear-gradient(90deg, transparent, rgba(245,200,66,0.4), transparent);
+        }
+        .countdown-num {
+          font-family: 'Space Grotesk', sans-serif;
+          font-weight: 700;
+          font-size: 17px;
+          color: var(--accent-gold);
+          line-height: 1.15;
+          letter-spacing: -0.02em;
+          font-variant-numeric: tabular-nums;
+        }
+        .countdown-unit-label {
+          font-size: 9px;
+          color: var(--text-muted);
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          margin-top: 1px;
+          font-family: 'Inter', sans-serif;
+        }
       `}</style>
     </div>
   )
@@ -68,7 +143,7 @@ export default function Header({ logoCount, hasActiveSale, saleEndDate }: {
             <div className="marquee-track">
               {Array.from({ length: 6 }).map((_, i) => (
                 <span key={i} className="marquee-item">
-                  ⚡ Special Price — All logos now only <strong>$300</strong> &nbsp;·&nbsp; Limited time offer &nbsp;·&nbsp; Grab yours before it ends &nbsp;&nbsp;&nbsp;
+                  ⚡ Special Price — All logos now from <strong>$300</strong> &nbsp;·&nbsp; Limited time offer &nbsp;·&nbsp; Grab yours before it ends &nbsp;&nbsp;&nbsp;
                 </span>
               ))}
             </div>
@@ -125,7 +200,7 @@ export default function Header({ logoCount, hasActiveSale, saleEndDate }: {
         {hasActiveSale && (
           <div className="hero-sale">
             <span className="hero-sale-icon">✦</span>
-            All logos now only <strong>$300</strong> — special price this month only
+            All logos now from <strong>$300</strong> — special price this month only
           </div>
         )}
         <p className="hero-sub">
