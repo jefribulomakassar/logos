@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
 
   const API_KEY = process.env.GOOGLE_API_KEY
   if (!API_KEY) {
-    return NextResponse.json({ error: 'API key not configured' }, { status: 500 })
+    return NextResponse.json({ images: [], error: 'API key not configured' })
   }
 
   try {
@@ -22,10 +22,10 @@ export async function GET(request: NextRequest) {
 
     if (!res.ok) {
       console.error('Drive API error:', data)
-      return NextResponse.json({ error: data.error?.message || 'Drive API failed', images: [] }, { status: 500 })
+      return NextResponse.json({ images: [], error: data.error?.message })
     }
 
-    const images = (data.files || []).map((f: { id: string; name: string }) => ({
+    const images = (data.files || []).map((f: { id: string }) => ({
       id: f.id,
       thumbnailUrl: `https://drive.google.com/thumbnail?id=${f.id}&sz=w800`,
       viewUrl: `https://drive.google.com/file/d/${f.id}/view`,
@@ -34,6 +34,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ images, debug: { total: images.length, folderId } })
   } catch (err) {
     console.error('Mockup fetch error:', err)
-    return NextResponse.json({ error: 'Failed to fetch mockups', images: [] }, { status: 500 })
+    return NextResponse.json({ images: [], error: 'Failed to fetch mockups' })
   }
 }
