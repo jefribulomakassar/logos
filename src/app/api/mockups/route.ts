@@ -1,16 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { google } from 'googleapis'
-
-function getDrive() {
-  const auth = new google.auth.GoogleAuth({
-    credentials: {
-      client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-      private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-    },
-    scopes: ['https://www.googleapis.com/auth/drive.readonly'],
-  })
-  return google.drive({ version: 'v3', auth })
-}
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
@@ -21,25 +9,51 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const drive = getDrive()
-
-    const res = await drive.files.list({
-      q: '"' + folderId + '" in parents and mimeType contains "image/" and trashed = false',
-      fields: 'files(id, name, mimeType)',
-      pageSize: 50,
+    // Gunakan Google Drive export sebagai gviz JSON — works untuk public folder
+    const url = 'https://drive.google.com/embeddedfolderview?id=' + folderId + '#list'
+    const res = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'Accept': 'text/html,application/xhtml+xml',
+      },
+      next: { revalidate: 3600 },
     })
 
-    const files = res.data.files || []
+    const html = await res.text()
+    const imageIds: string[] = []
 
-    const images = files.map(file => ({
-      id: file.id,
-      thumbnailUrl: 'https://drive.google.com/thumbnail?id=' + file.id + '&sz=w800',
-      viewUrl: 'https://drive.google.com/file/d/' + file.id + '/view',
+    // Pattern dari embedded folder view
+    const regex = /"([a-zA-Z0-9_-]{25,})","([^"]+\.(jpg|jpeg|png|webp|JPG|PNG))"/g
+    let match: RegExpExecArray | null
+    while ((match = regex.exec(html)) !== null) {
+      if (!imageIds.includes(match[1])) imageIds.push(match[1])
+    }
+
+    // Fallback pattern
+    if (imageIds.length === 0) {
+      const regex2 = /\["([a-zA-Z0-9_-]{25,})","[^"]*","(image\/jpeg|image\/png|image\/webp)"/g
+      while ((match = regex2.exec(html)) !== null) {
+        if (!imageIds.includes(match[1])) imageIds.push(match[1])
+      }
+    }
+
+    // Fallback ke anchor /file/d/ pattern
+    if (imageIds.length === 0) {
+      const regex3 = /\/file\/d\/([a-zA-Z0-9_-]{20,})\/view/g
+      while ((match = regex3.exec(html)) !== null) {
+        if (!imageIds.includes(match[1])) imageIds.push(match[1])
+      }
+    }
+
+    const images = imageIds.slice(0, 30).map(id => ({
+      id,
+      thumbnailUrl: 'https://drive.google.com/thumbnail?id=' + id + '&sz=w800',
+      viewUrl: 'https://drive.google.com/file/d/' + id + '/view',
     }))
 
-    return NextResponse.json({ images, total: images.length })
+    return NextResponse.json({ images, debug: { total: imageIds.length, folderId } })
   } catch (err) {
-    console.error('Drive API error:', err)
-    return NextResponse.json({ error: 'Failed to fetch mockups', detail: String(err) }, { status: 500 })
+    console.error('Mockup fetch error:', err)
+    return NextResponse.json({ error: 'Failed to fetch mockups' }, { status: 500 })
   }
 }
