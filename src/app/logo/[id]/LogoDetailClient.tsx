@@ -134,8 +134,12 @@ export default function LogoDetailClient({ logo, imageUrl }: Props) {
 
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
             {logo.logoUrl && (
-              <a href={logo.logoUrl} target="_blank" rel="noopener noreferrer" style={{ flex: 1, minWidth: 140, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8, background: 'linear-gradient(135deg,#F5C842,#E8A020)', color: '#0A0A0F', borderRadius: 12, padding: '12px 20px', fontFamily: 'Space Grotesk, sans-serif', fontWeight: 600, fontSize: 14, textDecoration: 'none' }}>
-                View on LogoGround
+                href={logo.logoUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ flex: 1, minWidth: 140, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8, background: 'linear-gradient(135deg,#F5C842,#E8A020)', color: '#0A0A0F', borderRadius: 12, padding: '12px 20px', fontFamily: 'Space Grotesk, sans-serif', fontWeight: 600, fontSize: 14, textDecoration: 'none' }}
+              >
+                View on LogoGround ↗
               </a>
             )}
             <button onClick={() => router.back()} style={{ flex: 1, minWidth: 120, background: '#12121A', color: '#8A8A9A', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: '12px 20px', fontFamily: 'Inter, sans-serif', fontSize: 14, cursor: 'pointer' }}>
@@ -152,10 +156,20 @@ export default function LogoDetailClient({ logo, imageUrl }: Props) {
           </h2>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 260px), 1fr))', gap: 12 }}>
             {mockups.map((m, i) => (
-              <a key={m.id} href={m.viewUrl} target="_blank" rel="noopener noreferrer" style={{ borderRadius: 12, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.08)', display: 'block' }}>
-                <img src={m.thumbnailUrl} alt={'mockup ' + (i + 1)} loading="lazy" style={{ width: '100%', aspectRatio: '4/3', objectFit: 'cover', display: 'block' }} />
-              </a>
-            ))}
+              key={m.id}
+              href={m.viewUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ borderRadius: 12, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.08)', display: 'block' }}
+            >
+              <img
+                src={m.thumbnailUrl}
+                alt={'mockup ' + (i + 1)}
+                loading="lazy"
+                style={{ width: '100%', aspectRatio: '4/3', objectFit: 'cover', display: 'block' }}
+              />
+            </a>
+          ))}
           </div>
         </div>
       )}
