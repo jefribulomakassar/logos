@@ -38,7 +38,7 @@ export default function LogoDetailClient({ logo, imageUrl }: Props) {
         </button>
         <div style={{display:'flex',alignItems:'center',gap:8}}>
           <span style={{width:7,height:7,background:'#F5C842',borderRadius:'50%',display:'inline-block'}} />
-          <span style={{fontFamily:'Space Grotesk,sans-serif',fontWeight:700,fontSize:16,color:'#F5F5F0'}}>LogoFolio</span>
+          <span style={{fontFamily:'Space Grotesk,sans-serif',fontWeight:700,fontSize:16,color:'#F5F5F0'}}>VibeLogos</span>
         </div>
       </div>
       <div style={{maxWidth:1600,margin:'0 auto',padding:'32px 24px',display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(min(100%, 460px), 1fr))',gap:40,alignItems:'start'}}>
