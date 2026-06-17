@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
     const query = `'${folderId}' in parents and mimeType contains 'image/' and trashed = false`
     const url = `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}&fields=files(id,name,mimeType)&pageSize=50&key=${API_KEY}`
 
-    const res = await fetch(url, { next: { revalidate: 3600 } })
+    const res = await fetch(url, { next: { revalidate: 60 } })
     const data = await res.json()
 
     if (!res.ok) {
