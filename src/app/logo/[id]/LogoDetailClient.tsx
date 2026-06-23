@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { Logo } from '@/lib/sheets'
+import { Logo, getEffectivePrice } from '@/lib/sheets'
 
 interface Props {
   logo: Logo
@@ -70,7 +70,9 @@ export default function LogoDetailClient({ logo, imageUrl }: Props) {
   }, [lightboxIndex, prevImage, nextImage])
 
   const allCategories = [logo.mainCategory, ...logo.secondCategories].filter(Boolean)
-  const priceDisplay = logo.price ? '$' + logo.price.toLocaleString() : 'Contact'
+  const { price: effectivePrice, isSpecial } = getEffectivePrice(logo)
+  const savedAmount = isSpecial ? logo.price - effectivePrice : 0
+  const priceDisplay = effectivePrice ? '$' + effectivePrice.toLocaleString() : 'Contact'
   const publishedDisplay = formatDate(logo.published)
 
   return (
@@ -164,10 +166,20 @@ export default function LogoDetailClient({ logo, imageUrl }: Props) {
           </h1>
 
           {/* Price */}
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 14, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+            {isSpecial && (
+              <span style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: '1.1rem', fontWeight: 500, color: '#4A4A5A', textDecoration: 'line-through' }}>
+                ${logo.price.toLocaleString()}
+              </span>
+            )}
             <span style={{ fontFamily: 'Space Grotesk, sans-serif', fontSize: '1.8rem', fontWeight: 700, color: '#F5C842' }}>
               {priceDisplay}
             </span>
+            {isSpecial && savedAmount > 0 && (
+              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', color: '#F5C842', background: 'rgba(245,200,66,0.12)', border: '1px solid rgba(245,200,66,0.3)', padding: '3px 10px', borderRadius: 6 }}>
+                Save ${savedAmount.toLocaleString()}
+              </span>
+            )}
             <span style={{ fontSize: 13, color: '#4A4A5A', fontStyle: 'italic' }}>by {logo.creator}</span>
           </div>
 
