@@ -1,6 +1,5 @@
 // src/hooks/useLikes.ts
 'use client'
-
 import { useState, useEffect, useCallback } from 'react'
 
 // Buat atau ambil userId yang persistent di localStorage
@@ -21,13 +20,13 @@ let cachePromise: Promise<Set<string>> | null = null
 async function fetchServerLikes(userId: string): Promise<Set<string>> {
   if (serverLikesCache) return serverLikesCache
   if (cachePromise) return cachePromise
-
   cachePromise = fetch('/api/like')
     .then(r => r.json())
     .then(data => {
       const rows: string[][] = data.rows || []
+      // Urutan kolom sheet: A=USER_EMAIL(userId), B=LOGO_ID(logoId)
       const myLikes = new Set(
-        rows.filter(r => r[1] === userId).map(r => r[0])
+        rows.filter(r => r[0] === userId).map(r => r[1])
       )
       serverLikesCache = myLikes
       return myLikes
@@ -37,7 +36,6 @@ async function fetchServerLikes(userId: string): Promise<Set<string>> {
       cachePromise = null
       return new Set<string>()
     })
-
   return cachePromise
 }
 
@@ -49,11 +47,9 @@ export function useLikes() {
   useEffect(() => {
     const uid = getOrCreateUserId()
     setUserId(uid)
-
     // Muat dari localStorage dulu (instant)
     const local = JSON.parse(localStorage.getItem('vibe_likes') || '[]') as string[]
     setLikedIds(new Set(local))
-
     // Kemudian sync dari server
     fetchServerLikes(uid).then(serverLikes => {
       // Merge: server adalah sumber kebenaran, tapi simpan ulang ke localStorage
@@ -65,24 +61,19 @@ export function useLikes() {
 
   const toggleLike = useCallback(async (logoId: string) => {
     if (!userId) return
-
     const isLiked = likedIds.has(logoId)
     const newSet = new Set(likedIds)
-
     if (isLiked) {
       newSet.delete(logoId)
     } else {
       newSet.add(logoId)
     }
-
     // Optimistic update
     setLikedIds(newSet)
     localStorage.setItem('vibe_likes', JSON.stringify(Array.from(newSet)))
-
     // Invalidate cache
     serverLikesCache = null
     cachePromise = null
-
     // Sync ke server
     try {
       if (isLiked) {
