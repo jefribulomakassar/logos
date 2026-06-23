@@ -58,7 +58,7 @@ export function useLikes() {
     fetchServerLikes(uid).then(serverLikes => {
       // Merge: server adalah sumber kebenaran, tapi simpan ulang ke localStorage
       setLikedIds(serverLikes)
-      localStorage.setItem('vibe_likes', JSON.stringify([...serverLikes]))
+      localStorage.setItem('vibe_likes', JSON.stringify(Array.from(serverLikes)))
       setLoading(false)
     })
   }, [])
@@ -77,7 +77,7 @@ export function useLikes() {
 
     // Optimistic update
     setLikedIds(newSet)
-    localStorage.setItem('vibe_likes', JSON.stringify([...newSet]))
+    localStorage.setItem('vibe_likes', JSON.stringify(Array.from(newSet)))
 
     // Invalidate cache
     serverLikesCache = null
@@ -102,7 +102,7 @@ export function useLikes() {
       // Rollback jika gagal
       console.error('Failed to sync like to server:', err)
       setLikedIds(likedIds)
-      localStorage.setItem('vibe_likes', JSON.stringify([...likedIds]))
+      localStorage.setItem('vibe_likes', JSON.stringify(Array.from(likedIds)))
     }
   }, [userId, likedIds])
 
