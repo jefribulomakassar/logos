@@ -16,6 +16,8 @@ function getSheets() {
   return google.sheets({ version: 'v4', auth })
 }
 
+// Urutan kolom di sheet: A=USER_EMAIL, B=LOGO_ID, C=LOGO_TITLE, D=TIMESTAMP
+
 // GET: ambil semua rows dari sheet favorites
 export async function GET() {
   try {
@@ -42,14 +44,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'logoId and userId required' }, { status: 400 })
     }
     const sheets = getSheets()
-    // Cek duplikat
+    // Cek duplikat (A=USER_EMAIL/userId, B=LOGO_ID/logoId)
     const existing = await sheets.spreadsheets.values.get({
       spreadsheetId: SPREADSHEET_ID,
       range: `${SHEET_NAME}!A:B`,
     })
     const allRows = existing.data.values || []
     const rows = allRows.length > 1 ? allRows.slice(1) : []
-    const alreadyLiked = rows.some(r => r[0] === logoId && r[1] === userId)
+    const alreadyLiked = rows.some(r => r[0] === userId && r[1] === logoId)
     if (alreadyLiked) {
       return NextResponse.json({ ok: true, skipped: true })
     }
@@ -58,7 +60,7 @@ export async function POST(req: NextRequest) {
       range: `${SHEET_NAME}!A:D`,
       valueInputOption: 'USER_ENTERED',
       requestBody: {
-        values: [[logoId, userId, logoTitle ?? '', new Date().toISOString()]],
+        values: [[userId, logoId, logoTitle ?? '', new Date().toISOString()]],
       },
     })
     return NextResponse.json({ ok: true })
@@ -76,14 +78,14 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ error: 'logoId and userId required' }, { status: 400 })
     }
     const sheets = getSheets()
-    // Ambil semua baris (termasuk header)
+    // Ambil semua baris (termasuk header) — A=USER_EMAIL/userId, B=LOGO_ID/logoId
     const existing = await sheets.spreadsheets.values.get({
       spreadsheetId: SPREADSHEET_ID,
       range: `${SHEET_NAME}!A:B`,
     })
     const allRows = existing.data.values || []
     // Cari index baris yang cocok (0-based, termasuk header)
-    const rowIndex = allRows.findIndex(r => r[0] === logoId && r[1] === userId)
+    const rowIndex = allRows.findIndex(r => r[0] === userId && r[1] === logoId)
     if (rowIndex === -1) {
       return NextResponse.json({ ok: true, skipped: true })
     }
