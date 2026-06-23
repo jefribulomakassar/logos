@@ -3,8 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Logo, getGoogleDriveImageUrl, getEffectivePrice } from '@/lib/sheets'
-import { useFavorites } from './FavoritesProvider'
-import { useSession, signIn } from 'next-auth/react'
+import { useLikesContext } from './LogoGrid'
 
 interface LogoCardProps {
   logo: Logo
@@ -23,17 +22,12 @@ export default function LogoCard({ logo }: LogoCardProps) {
   const priceDisplay = effectivePrice ? '$' + effectivePrice.toLocaleString() : 'Contact'
   const allCategories = [logo.mainCategory, ...logo.secondCategories].filter(Boolean).slice(0, 3)
 
-  const { favorites, toggleFavorite } = useFavorites()
-  const { data: session } = useSession()
-  const isLiked = favorites.includes(logo.id)
+  const { likedIds, toggleLike } = useLikesContext()
+  const isLiked = likedIds.has(logo.id)
 
   const handleLike = (e: React.MouseEvent) => {
     e.stopPropagation()
-    if (!session?.user) {
-      signIn('google')
-      return
-    }
-    toggleFavorite(logo.id, logo.title)
+    toggleLike(logo.id)
   }
 
   const handleToggleMockup = async (e: React.MouseEvent) => {
@@ -91,7 +85,7 @@ export default function LogoCard({ logo }: LogoCardProps) {
         <button
           className={'like-btn' + (isLiked ? ' liked' : '')}
           onClick={handleLike}
-          title={session ? (isLiked ? 'Unlike' : 'Like') : 'Sign in to like'}
+          title={isLiked ? 'Unlike' : 'Like'}
         >
           <svg viewBox="0 0 16 16" fill={isLiked ? 'currentColor' : 'none'} width="14" height="14">
             <path d="M8 13.5S1.5 9.5 1.5 5.5a3.5 3.5 0 016.5-1.8A3.5 3.5 0 0114.5 5.5c0 4-6.5 8-6.5 8z" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
