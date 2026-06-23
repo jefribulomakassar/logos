@@ -17,7 +17,7 @@ export function useFavorites() {
   return useContext(FavoritesContext)
 }
 
-export function FavoritesProvider({ children }: { children: ReactNode }) {
+export default function FavoritesProvider({ children }: { children: ReactNode }) {
   const { data: session } = useSession()
   const userId = (session?.user?.email ?? session?.user?.name ?? '') as string
 
