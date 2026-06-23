@@ -2,13 +2,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { google } from 'googleapis'
 
-const SPREADSHEET_ID = '1PzZUFsoWL2wAvJGjBIzBpO_2lwRHbBSicys01rEDU_I'
+const SPREADSHEET_ID = process.env.GOOGLE_SHEET_ID as string
 const SHEET_NAME = 'favorites'
 
 function getSheets() {
   const auth = new google.auth.GoogleAuth({
     credentials: {
-      client_email: process.env.GOOGLE_CLIENT_EMAIL,
+      client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
       private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
     },
     scopes: ['https://www.googleapis.com/auth/spreadsheets'],
@@ -41,9 +41,7 @@ export async function POST(req: NextRequest) {
     if (!logoId || !userId) {
       return NextResponse.json({ error: 'logoId and userId required' }, { status: 400 })
     }
-
     const sheets = getSheets()
-
     // Cek duplikat
     const existing = await sheets.spreadsheets.values.get({
       spreadsheetId: SPREADSHEET_ID,
@@ -55,7 +53,6 @@ export async function POST(req: NextRequest) {
     if (alreadyLiked) {
       return NextResponse.json({ ok: true, skipped: true })
     }
-
     await sheets.spreadsheets.values.append({
       spreadsheetId: SPREADSHEET_ID,
       range: `${SHEET_NAME}!A:D`,
@@ -64,7 +61,6 @@ export async function POST(req: NextRequest) {
         values: [[logoId, userId, logoTitle ?? '', new Date().toISOString()]],
       },
     })
-
     return NextResponse.json({ ok: true })
   } catch (err) {
     console.error('POST /api/like error:', err)
@@ -79,27 +75,22 @@ export async function DELETE(req: NextRequest) {
     if (!logoId || !userId) {
       return NextResponse.json({ error: 'logoId and userId required' }, { status: 400 })
     }
-
     const sheets = getSheets()
-
     // Ambil semua baris (termasuk header)
     const existing = await sheets.spreadsheets.values.get({
       spreadsheetId: SPREADSHEET_ID,
       range: `${SHEET_NAME}!A:B`,
     })
     const allRows = existing.data.values || []
-
     // Cari index baris yang cocok (0-based, termasuk header)
     const rowIndex = allRows.findIndex(r => r[0] === logoId && r[1] === userId)
     if (rowIndex === -1) {
       return NextResponse.json({ ok: true, skipped: true })
     }
-
     // Dapatkan sheetId
     const meta = await sheets.spreadsheets.get({ spreadsheetId: SPREADSHEET_ID })
     const sheet = meta.data.sheets?.find(s => s.properties?.title === SHEET_NAME)
     const sheetId = sheet?.properties?.sheetId ?? 0
-
     // Hapus baris (rowIndex sudah 0-based sesuai Sheets API)
     await sheets.spreadsheets.batchUpdate({
       spreadsheetId: SPREADSHEET_ID,
@@ -116,7 +107,6 @@ export async function DELETE(req: NextRequest) {
         }],
       },
     })
-
     return NextResponse.json({ ok: true })
   } catch (err) {
     console.error('DELETE /api/like error:', err)
