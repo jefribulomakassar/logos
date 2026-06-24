@@ -1,9 +1,11 @@
 'use client'
 
+import { useState } from 'react'
+import ContactModal from './ContactModal'
+
 // ─── Config — samakan dengan LogoCard.tsx ─────────────────────────────────────
-const WA_NUMBER = '6282xxxxxxxxx' // ganti dengan nomor WA kamu (format internasional, tanpa +)
-const CONTACT_EMAIL = 'youremail@example.com' // ganti dengan email kontak kamu
-const LG_PORTFOLIO_URL = 'https://www.logoground.com/profile.php?id=jeflodesign' // URL profil LogoGround
+// const WA_NUMBER = '6282xxxxxxxxx' // [DINONAKTIFKAN] ganti dengan nomor WA kamu (format internasional, tanpa +) — uncomment untuk reaktivasi WA
+const LG_PORTFOLIO_URL = 'https://www.logoground.com/designer.php?did=228137' // URL profil LogoGround
 const LG_TERMS_URL = 'https://www.logoground.com/user-agreement.php' // User Agreement resmi LogoGround
 const LG_FAQ_URL = 'https://www.logoground.com/faq.php' // Buyer FAQ resmi LogoGround
 // ──────────────────────────────────────────────────────────────────────────────
@@ -23,7 +25,7 @@ const STEPS = [
   {
     num: '02',
     title: 'Contact via email or LogoGround',
-    desc: 'Reach out by email, or click straight through to LogoGround.com to purchase the logo you like directly on the platform.',
+    desc: 'Send us a quick message through our contact form, or click straight through to LogoGround.com to purchase the logo you like directly on the platform.',
     icon: (
       <svg viewBox="0 0 24 24" fill="none" width="22" height="22">
         <path d="M3 5h18v14H3V5z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round"/>
@@ -51,14 +53,16 @@ const INCLUDED = [
 ]
 
 export default function HowToOrder() {
-  const handleWa = () => {
-    const msg = encodeURIComponent("Hi! I'd like to order a logo from VibeLogos. Can you help me?")
-    window.open(`https://wa.me/${WA_NUMBER}?text=${msg}`, '_blank')
-  }
+  const [showContactModal, setShowContactModal] = useState(false)
+
+  // [DINONAKTIFKAN] handleWa — uncomment untuk reaktivasi tombol WhatsApp
+  // const handleWa = () => {
+  //   const msg = encodeURIComponent("Hi! I'd like to order a logo from VibeLogos. Can you help me?")
+  //   window.open(`https://wa.me/${WA_NUMBER}?text=${msg}`, '_blank')
+  // }
 
   const handleEmail = () => {
-    const subject = encodeURIComponent("Logo order inquiry — VibeLogos")
-    window.location.href = `mailto:${CONTACT_EMAIL}?subject=${subject}`
+    setShowContactModal(true)
   }
 
   const handleLogoGround = () => {
@@ -66,6 +70,7 @@ export default function HowToOrder() {
   }
 
   return (
+    <>
     <section className="how-section">
       <div className="how-inner">
         <div className="how-header">
@@ -109,12 +114,14 @@ export default function HowToOrder() {
 
         {/* CTA */}
         <div className="how-cta">
-          {/* <button className="cta-wa" onClick={handleWa}>
+          {/* [DINONAKTIFKAN] Tombol WhatsApp — uncomment untuk reaktivasi
+          <button className="cta-wa" onClick={handleWa}>
             <svg viewBox="0 0 16 16" fill="currentColor" width="16" height="16">
               <path d="M8 1C4.13 1 1 4.13 1 8c0 1.26.33 2.45.9 3.48L1 15l3.62-.88A7 7 0 108 1zm0 12.5a5.5 5.5 0 110-11 5.5 5.5 0 010 11zm2.94-3.83c-.16-.08-.96-.47-1.1-.53-.15-.06-.26-.08-.37.08-.11.16-.43.53-.52.64-.1.11-.19.12-.35.04-.96-.48-1.6-1.07-2.09-2-.16-.28.16-.26.45-.86.05-.11.03-.21-.02-.29-.04-.08-.37-.89-.51-1.22-.13-.31-.27-.27-.37-.27-.1 0-.2-.01-.31-.01s-.29.04-.44.22c-.15.17-.58.57-.58 1.38s.6 1.6.68 1.71c.08.11 1.17 1.79 2.84 2.51 1.67.72 1.67.48 1.97.45.3-.03.96-.39 1.1-.77.14-.38.14-.7.1-.77-.05-.07-.16-.11-.33-.19z"/>
             </svg>
             Order via WhatsApp
-          </button> */}
+          </button>
+          */}
           <button className="cta-email" onClick={handleEmail}>
             <svg viewBox="0 0 16 16" fill="none" width="15" height="15">
               <path d="M2 4h12v8H2V4z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round"/>
@@ -277,6 +284,7 @@ export default function HowToOrder() {
           gap: 12px;
           flex-wrap: wrap;
         }
+        /* [DINONAKTIFKAN] .cta-wa — uncomment untuk reaktivasi tombol WhatsApp
         .cta-wa {
           display: flex;
           align-items: center;
@@ -296,6 +304,7 @@ export default function HowToOrder() {
           background: #1EBF5A;
           transform: translateY(-1px);
         }
+        */
         .cta-email {
           display: flex;
           align-items: center;
@@ -306,13 +315,13 @@ export default function HowToOrder() {
           font-size: 13px;
           font-weight: 600;
           cursor: pointer;
-          background: rgba(79,142,247,0.12);
-          color: var(--accent-blue);
-          border: 1px solid rgba(79,142,247,0.35);
+          border: none;
+          background: var(--accent-gold);
+          color: #0A0A0F;
           transition: background 0.2s, transform 0.15s;
         }
         .cta-email:hover {
-          background: rgba(79,142,247,0.2);
+          opacity: 0.88;
           transform: translateY(-1px);
         }
         .cta-lg {
@@ -372,9 +381,14 @@ export default function HowToOrder() {
           .steps-grid { grid-template-columns: 1fr; }
           .included-list { grid-template-columns: 1fr; }
           .how-cta { flex-direction: column; }
-          .cta-wa, .cta-email, .cta-lg { justify-content: center; }
+          .cta-email, .cta-lg { justify-content: center; }
         }
       `}</style>
     </section>
+
+    {showContactModal && (
+      <ContactModal onClose={() => setShowContactModal(false)} />
+    )}
+    </>
   )
 }
