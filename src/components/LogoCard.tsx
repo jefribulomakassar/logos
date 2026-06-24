@@ -750,7 +750,26 @@ export default function LogoCard({ logo, layout = 'grid' }: LogoCardProps) {
         `}</style>
       </article>
 
-      <MockupLightboxOverlay />
+      {lightboxIndex !== null && mockupImages.length > 0 && (
+        <div
+          onClick={closeLightbox}
+          style={{
+            position: 'fixed', inset: 0, zIndex: 2000,
+            background: 'rgba(0,0,0,0.92)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}
+        >
+          <button onClick={closeLightbox} style={{ position: 'absolute', top: 20, right: 24, background: 'rgba(255,255,255,0.08)', border: 'none', color: '#F5F5F0', fontSize: 22, width: 40, height: 40, borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2001 }}>✕</button>
+          <span style={{ position: 'absolute', top: 24, left: '50%', transform: 'translateX(-50%)', fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#8A8A9A' }}>{lightboxIndex + 1} / {mockupImages.length}</span>
+          {mockupImages.length > 1 && <button onClick={e => { e.stopPropagation(); prevImage() }} style={{ position: 'absolute', left: 16, background: 'rgba(255,255,255,0.08)', border: 'none', color: '#F5F5F0', fontSize: 28, width: 44, height: 44, borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2001 }}>‹</button>}
+          <div onClick={e => e.stopPropagation()} style={{ maxWidth: '90vw', maxHeight: '85vh' }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={mockupImages[lightboxIndex].thumbnailUrl} alt={'mockup ' + (lightboxIndex + 1)} style={{ maxWidth: '90vw', maxHeight: '85vh', objectFit: 'contain', borderRadius: 12, boxShadow: '0 8px 60px rgba(0,0,0,0.6)' }} />
+          </div>
+          {mockupImages.length > 1 && <button onClick={e => { e.stopPropagation(); nextImage() }} style={{ position: 'absolute', right: 16, background: 'rgba(255,255,255,0.08)', border: 'none', color: '#F5F5F0', fontSize: 28, width: 44, height: 44, borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2001 }}>›</button>}
+        </div>
+      )}
+      
     </>
   )
 }
