@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Logo, getGoogleDriveImageUrl, getEffectivePrice } from '@/lib/sheets'
 import { useLikesContext } from './LogoGrid'
@@ -19,7 +19,7 @@ export default function LogoCard({ logo, layout = 'grid' }: LogoCardProps) {
   const [showMockup, setShowMockup] = useState(false)
   const [loadingMockup, setLoadingMockup] = useState(false)
   const [showLightbox, setShowLightbox] = useState(false)
-  const [lightboxMockup, setLightboxMockup] = useState<{ id: string; thumbnailUrl: string } | null>(null)
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
 
   const imageUrl = getGoogleDriveImageUrl(logo.logoShow)
   const { price: effectivePrice, isSpecial } = getEffectivePrice(logo)
@@ -30,6 +30,28 @@ export default function LogoCard({ logo, layout = 'grid' }: LogoCardProps) {
   const { likedIds, toggleLike } = useLikesContext()
   const { data: session } = useSession()
   const isLiked = likedIds.has(logo.id)
+
+  const openLightbox = (index: number) => setLightboxIndex(index)
+  const closeLightbox = () => setLightboxIndex(null)
+  const prevImage = useCallback(() => {
+    if (lightboxIndex === null) return
+    setLightboxIndex((lightboxIndex - 1 + mockupImages.length) % mockupImages.length)
+  }, [lightboxIndex, mockupImages.length])
+  const nextImage = useCallback(() => {
+    if (lightboxIndex === null) return
+    setLightboxIndex((lightboxIndex + 1) % mockupImages.length)
+  }, [lightboxIndex, mockupImages.length])
+
+  useEffect(() => {
+    if (lightboxIndex === null) return
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') prevImage()
+      if (e.key === 'ArrowRight') nextImage()
+      if (e.key === 'Escape') closeLightbox()
+    }
+    window.addEventListener('keydown', handleKey)
+    return () => window.removeEventListener('keydown', handleKey)
+  }, [lightboxIndex, prevImage, nextImage])
 
   const handleLike = (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -77,51 +99,79 @@ export default function LogoCard({ logo, layout = 'grid' }: LogoCardProps) {
     if (logo.logoUrl) window.open(logo.logoUrl, '_blank')
   }
 
-  const handleMockupThumbClick = (e: React.MouseEvent, img: { id: string; thumbnailUrl: string }) => {
-    e.stopPropagation()
-    setLightboxMockup(img)
-  }
-
-  const MockupLightbox = () => {
-    if (!lightboxMockup) return null
+  // Lightbox overlay — dipakai oleh kedua layout
+  const MockupLightboxOverlay = () => {
+    if (lightboxIndex === null || mockupImages.length === 0) return null
     return (
       <div
-        onClick={() => setLightboxMockup(null)}
+        onClick={closeLightbox}
         style={{
-          position: 'fixed', inset: 0,
-          background: 'rgba(8,8,12,0.92)',
-          backdropFilter: 'blur(8px)',
-          zIndex: 2000,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '24px',
+          position: 'fixed', inset: 0, zIndex: 2000,
+          background: 'rgba(0,0,0,0.92)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
         }}
       >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={lightboxMockup.thumbnailUrl}
-          alt="mockup full"
-          onClick={e => e.stopPropagation()}
-          style={{
-            maxWidth: '90vw',
-            maxHeight: '88vh',
-            objectFit: 'contain',
-            borderRadius: '12px',
-            boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
-          }}
-        />
+        {/* Close */}
         <button
-          onClick={() => setLightboxMockup(null)}
+          onClick={closeLightbox}
           style={{
-            position: 'fixed', top: 20, right: 20,
-            width: 38, height: 38, borderRadius: '50%',
-            background: 'rgba(20,20,30,0.9)',
-            border: '1px solid rgba(255,255,255,0.2)',
-            color: '#fff', fontSize: 20, cursor: 'pointer',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            position: 'absolute', top: 20, right: 24,
+            background: 'rgba(255,255,255,0.08)', border: 'none',
+            color: '#F5F5F0', fontSize: 22, width: 40, height: 40,
+            borderRadius: '50%', cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2001,
           }}
-        >×</button>
+        >✕</button>
+
+        {/* Counter */}
+        <span style={{
+          position: 'absolute', top: 24, left: '50%', transform: 'translateX(-50%)',
+          fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#8A8A9A',
+        }}>
+          {lightboxIndex + 1} / {mockupImages.length}
+        </span>
+
+        {/* Prev */}
+        {mockupImages.length > 1 && (
+          <button
+            onClick={e => { e.stopPropagation(); prevImage() }}
+            style={{
+              position: 'absolute', left: 16,
+              background: 'rgba(255,255,255,0.08)', border: 'none',
+              color: '#F5F5F0', fontSize: 28, width: 44, height: 44,
+              borderRadius: '50%', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2001,
+            }}
+          >‹</button>
+        )}
+
+        {/* Image */}
+        <div onClick={e => e.stopPropagation()} style={{ maxWidth: '90vw', maxHeight: '85vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={mockupImages[lightboxIndex].thumbnailUrl}
+            alt={'mockup ' + (lightboxIndex + 1)}
+            style={{
+              maxWidth: '90vw', maxHeight: '85vh',
+              objectFit: 'contain', borderRadius: 12,
+              boxShadow: '0 8px 60px rgba(0,0,0,0.6)',
+            }}
+          />
+        </div>
+
+        {/* Next */}
+        {mockupImages.length > 1 && (
+          <button
+            onClick={e => { e.stopPropagation(); nextImage() }}
+            style={{
+              position: 'absolute', right: 16,
+              background: 'rgba(255,255,255,0.08)', border: 'none',
+              color: '#F5F5F0', fontSize: 28, width: 44, height: 44,
+              borderRadius: '50%', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2001,
+            }}
+          >›</button>
+        )}
       </div>
     )
   }
@@ -352,11 +402,12 @@ export default function LogoCard({ logo, layout = 'grid' }: LogoCardProps) {
           />
         )}
 
-        <MockupLightbox />
+        <MockupLightboxOverlay />
       </>
     )
   }
 
+  // GRID LAYOUT
   return (
     <>
       <article className={'logo-card' + (isSpecial ? ' on-sale' : '')} onClick={handleCardClick}>
@@ -417,7 +468,7 @@ export default function LogoCard({ logo, layout = 'grid' }: LogoCardProps) {
 
         {showMockup && mockupImages.length > 0 && (
           <div className="mockup-strip" onClick={e => e.stopPropagation()}>
-            {mockupImages.map(img => (
+            {mockupImages.map((img, i) => (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 key={img.id}
@@ -425,7 +476,7 @@ export default function LogoCard({ logo, layout = 'grid' }: LogoCardProps) {
                 alt="mockup"
                 className="mockup-thumb"
                 loading="lazy"
-                onClick={(e) => handleMockupThumbClick(e, img)}
+                onClick={e => { e.stopPropagation(); openLightbox(i) }}
               />
             ))}
           </div>
@@ -699,46 +750,7 @@ export default function LogoCard({ logo, layout = 'grid' }: LogoCardProps) {
         `}</style>
       </article>
 
-      {lightboxMockup && (
-        <div
-          onClick={() => setLightboxMockup(null)}
-          style={{
-            position: 'fixed', inset: 0,
-            background: 'rgba(8,8,12,0.92)',
-            backdropFilter: 'blur(8px)',
-            zIndex: 2000,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '24px',
-          }}
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={lightboxMockup.thumbnailUrl}
-            alt="mockup full"
-            onClick={e => e.stopPropagation()}
-            style={{
-              maxWidth: '90vw',
-              maxHeight: '88vh',
-              objectFit: 'contain',
-              borderRadius: '12px',
-              boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
-            }}
-          />
-          <button
-            onClick={() => setLightboxMockup(null)}
-            style={{
-              position: 'fixed', top: 20, right: 20,
-              width: 38, height: 38, borderRadius: '50%',
-              background: 'rgba(20,20,30,0.9)',
-              border: '1px solid rgba(255,255,255,0.2)',
-              color: '#fff', fontSize: 20, cursor: 'pointer',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}
-          >×</button>
-        </div>
-      )}
+      <MockupLightboxOverlay />
     </>
   )
 }
