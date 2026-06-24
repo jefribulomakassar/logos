@@ -43,10 +43,10 @@ const STEPS = [
 ]
 
 const INCLUDED = [
-  'Source file (Adobe Illustrator .AI / EPS)',
+  // 'Source file (Adobe Illustrator .AI / EPS)',
   'Vector file (.SVG)',
-  'High-res transparent .PNG',
-  'Print-ready .PDF',
+  // 'High-res transparent .PNG',
+  // 'Print-ready .PDF',
   '100% exclusive ownership',
   'Full copyright transfer',
 ]
