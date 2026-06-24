@@ -59,7 +59,7 @@ export function useLikes() {
     })
   }, [])
 
-  const toggleLike = useCallback(async (logoId: string) => {
+  const toggleLike = useCallback(async (logoId: string, logoTitle?: string) => {
     if (!userId) return
     const isLiked = likedIds.has(logoId)
     const newSet = new Set(likedIds)
@@ -86,7 +86,7 @@ export function useLikes() {
         await fetch('/api/like', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ logoId, userId }),
+          body: JSON.stringify({ logoId, userId, logoTitle }),
         })
       }
     } catch (err) {
