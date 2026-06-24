@@ -6,7 +6,7 @@ export default function Footer() {
       <div className="footer-inner">
         <div className="footer-brand">
           <span className="footer-dot" />
-          <span>LogoFolio</span>
+          <span>VibeLogos</span>
         </div>
         <p className="footer-text">
           Premium logos by{' '}
