@@ -118,11 +118,11 @@ export default function LogoCard({ logo, layout = 'grid' }: LogoCardProps) {
 
           <div className="row-body">
             <div className="row-main">
-              <div className="row-cats">
+              {/* <div className="row-cats">
                 {allCategories.map(cat => (
                   <span key={cat} className="cat-badge">{cat}</span>
                 ))}
-              </div>
+              </div> */}
               <h3 className="row-title">{logo.title}</h3>
               <p className="row-desc">{logo.description}</p>
               <span className="row-creator">by {logo.creator}</span>
