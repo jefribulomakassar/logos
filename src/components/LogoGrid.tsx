@@ -21,7 +21,7 @@ interface LogoGridProps {
   categories: string[]
 }
 
-type Columns = 'auto' | 3 | 4 | 5
+type Columns = 'auto' | 3 | 4 | 5 | 'list'
 
 export default function LogoGrid({ logos, categories }: LogoGridProps) {
   const [search, setSearch] = useState('')
@@ -62,6 +62,7 @@ export default function LogoGrid({ logos, categories }: LogoGridProps) {
     { val: 3, label: '⊞' },
     { val: 4, label: '⊟' },
     { val: 5, label: '≣' },
+    { val: 'list', label: '☰' },
   ]
 
   return (
@@ -103,7 +104,11 @@ export default function LogoGrid({ logos, categories }: LogoGridProps) {
                 key={val}
                 className={`col-btn ${columns === val ? 'active' : ''}`}
                 onClick={() => setColumns(val)}
-                title={val === 'auto' ? 'Auto (sesuaikan lebar layar)' : `${val} columns`}
+                title={
+                  val === 'auto' ? 'Auto (sesuaikan lebar layar)' :
+                  val === 'list' ? 'List view' :
+                  `${val} columns`
+                }
               >
                 {label}
               </button>
@@ -132,16 +137,20 @@ export default function LogoGrid({ logos, categories }: LogoGridProps) {
 
         {filtered.length > 0 ? (
           <div
-            className="logo-grid"
-            style={{
-              gridTemplateColumns:
-                columns === 'auto'
-                  ? 'repeat(auto-fill, minmax(260px, 1fr))'
-                  : `repeat(${columns}, 1fr)`,
-            }}
+            className={'logo-grid' + (columns === 'list' ? ' is-list' : '')}
+            style={
+              columns === 'list'
+                ? undefined
+                : {
+                    gridTemplateColumns:
+                      columns === 'auto'
+                        ? 'repeat(auto-fill, minmax(260px, 1fr))'
+                        : `repeat(${columns}, 1fr)`,
+                  }
+            }
           >
             {filtered.map(logo => (
-              <LogoCard key={logo.id} logo={logo} />
+              <LogoCard key={logo.id} logo={logo} layout={columns === 'list' ? 'list' : 'grid'} />
             ))}
           </div>
         ) : (
@@ -301,6 +310,11 @@ export default function LogoGrid({ logos, categories }: LogoGridProps) {
           .logo-grid {
             display: grid;
             gap: 24px;
+          }
+          .logo-grid.is-list {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
           }
 
           .empty-state {
