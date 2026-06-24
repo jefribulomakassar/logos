@@ -63,8 +63,6 @@ export default function LogoCard({ logo, layout = 'grid' }: LogoCardProps) {
     }
   }
 
-  // Mode grid: klik card navigasi ke halaman detail (perilaku lama).
-  // Mode list: klik baris membuka lightbox popup untuk lihat detail cepat.
   const handleCardClick = () => {
     if (layout === 'list') {
       setShowLightbox(true)
@@ -101,11 +99,6 @@ export default function LogoCard({ logo, layout = 'grid' }: LogoCardProps) {
 
           <div className="row-body">
             <div className="row-main">
-              {/* <div className="row-cats">
-                {allCategories.map(cat => (
-                  <span key={cat} className="cat-badge">{cat}</span>
-                ))}
-              </div> */}
               <h3 className="row-title">{logo.title}</h3>
               <p className="row-desc">{logo.description}</p>
               <span className="row-creator">by {logo.creator}</span>
@@ -197,21 +190,6 @@ export default function LogoCard({ logo, layout = 'grid' }: LogoCardProps) {
               gap: 6px;
               min-width: 0;
               flex: 1;
-            }
-            .row-cats {
-              display: flex;
-              flex-wrap: wrap;
-              gap: 5px;
-            }
-            .cat-badge {
-              font-size: 10px;
-              font-weight: 500;
-              letter-spacing: 0.04em;
-              text-transform: uppercase;
-              color: var(--accent-blue);
-              background: var(--accent-blue-dim);
-              padding: 3px 8px;
-              border-radius: 4px;
             }
             .row-title {
               font-size: 16px;
@@ -345,7 +323,6 @@ export default function LogoCard({ logo, layout = 'grid' }: LogoCardProps) {
           </div>
         )}
 
-        {/* Like button — pojok kiri atas */}
         <button
           className={'like-btn' + (isLiked ? ' liked' : '')}
           onClick={handleLike}
@@ -356,7 +333,6 @@ export default function LogoCard({ logo, layout = 'grid' }: LogoCardProps) {
           </svg>
         </button>
 
-        {/* Action buttons — muncul di pojok tanpa overlay gelap */}
         <div className="card-actions">
           {logo.logoUrl && (
             <button className="btn-action btn-view" onClick={handleViewLogo} title="View on LogoGround">
@@ -386,7 +362,6 @@ export default function LogoCard({ logo, layout = 'grid' }: LogoCardProps) {
         </div>
       </div>
 
-      {/* Mockup strip */}
       {showMockup && mockupImages.length > 0 && (
         <div className="mockup-strip" onClick={e => e.stopPropagation()}>
           {mockupImages.map(img => (
@@ -406,11 +381,6 @@ export default function LogoCard({ logo, layout = 'grid' }: LogoCardProps) {
       )}
 
       <div className="card-body">
-        <div className="card-cats">
-          {allCategories.map(cat => (
-            <span key={cat} className="cat-badge">{cat}</span>
-          ))}
-        </div>
         <h3 className="card-title">{logo.title}</h3>
         <p className="card-desc">{logo.description}</p>
         <div className="card-footer">
@@ -515,7 +485,6 @@ export default function LogoCard({ logo, layout = 'grid' }: LogoCardProps) {
           color: #FF4D6D;
           border-color: rgba(255,77,109,0.4);
         }
-
         .card-image-wrap {
           position: relative;
           aspect-ratio: 1 / 1;
@@ -544,8 +513,6 @@ export default function LogoCard({ logo, layout = 'grid' }: LogoCardProps) {
           color: var(--text-muted);
           background: linear-gradient(135deg, #0D0D15, #14141F);
         }
-
-        /* Action buttons pojok kanan atas — tanpa overlay gelap */
         .card-actions {
           position: absolute;
           top: 10px;
@@ -591,7 +558,6 @@ export default function LogoCard({ logo, layout = 'grid' }: LogoCardProps) {
           border-color: rgba(79, 142, 247, 0.5);
           color: var(--accent-blue);
         }
-
         .spinner {
           width: 10px;
           height: 10px;
@@ -602,8 +568,6 @@ export default function LogoCard({ logo, layout = 'grid' }: LogoCardProps) {
           display: inline-block;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
-
-        /* Mockup horizontal scroll strip */
         .mockup-strip {
           display: flex;
           gap: 8px;
@@ -635,27 +599,11 @@ export default function LogoCard({ logo, layout = 'grid' }: LogoCardProps) {
           border-top: 1px solid var(--border);
           text-align: center;
         }
-
         .card-body {
           padding: 16px;
           display: flex;
           flex-direction: column;
           gap: 8px;
-        }
-        .card-cats {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 5px;
-        }
-        .cat-badge {
-          font-size: 10px;
-          font-weight: 500;
-          letter-spacing: 0.04em;
-          text-transform: uppercase;
-          color: var(--accent-blue);
-          background: var(--accent-blue-dim);
-          padding: 3px 8px;
-          border-radius: 4px;
         }
         .card-title {
           font-size: 15px;
