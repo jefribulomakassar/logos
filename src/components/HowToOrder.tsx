@@ -2,8 +2,10 @@
 
 // ─── Config — samakan dengan LogoCard.tsx ─────────────────────────────────────
 const WA_NUMBER = '6282xxxxxxxxx' // ganti dengan nomor WA kamu (format internasional, tanpa +)
-const CONTACT_EMAIL = 'jeflodesign@gmail.com' // ganti dengan email kontak kamu
-const LG_PORTFOLIO_URL = 'https://www.logoground.com/designer.php?did=228137' // URL profil LogoGround
+const CONTACT_EMAIL = 'youremail@example.com' // ganti dengan email kontak kamu
+const LG_PORTFOLIO_URL = 'https://www.logoground.com/profile.php?id=jeflodesign' // URL profil LogoGround
+const LG_TERMS_URL = 'https://www.logoground.com/user-agreement.php' // User Agreement resmi LogoGround
+const LG_FAQ_URL = 'https://www.logoground.com/faq.php' // Buyer FAQ resmi LogoGround
 // ──────────────────────────────────────────────────────────────────────────────
 
 const STEPS = [
@@ -43,10 +45,7 @@ const STEPS = [
 ]
 
 const INCLUDED = [
-  // 'Source file (Adobe Illustrator .AI / EPS)',
-  'Vector file (.SVG)',
-  // 'High-res transparent .PNG',
-  // 'Print-ready .PDF',
+  '.SVG (Vector source file format)',
   '100% exclusive ownership',
   'Full copyright transfer',
 ]
@@ -110,12 +109,12 @@ export default function HowToOrder() {
 
         {/* CTA */}
         <div className="how-cta">
-          {/* <button className="cta-wa" onClick={handleWa}>
+          <button className="cta-wa" onClick={handleWa}>
             <svg viewBox="0 0 16 16" fill="currentColor" width="16" height="16">
               <path d="M8 1C4.13 1 1 4.13 1 8c0 1.26.33 2.45.9 3.48L1 15l3.62-.88A7 7 0 108 1zm0 12.5a5.5 5.5 0 110-11 5.5 5.5 0 010 11zm2.94-3.83c-.16-.08-.96-.47-1.1-.53-.15-.06-.26-.08-.37.08-.11.16-.43.53-.52.64-.1.11-.19.12-.35.04-.96-.48-1.6-1.07-2.09-2-.16-.28.16-.26.45-.86.05-.11.03-.21-.02-.29-.04-.08-.37-.89-.51-1.22-.13-.31-.27-.27-.37-.27-.1 0-.2-.01-.31-.01s-.29.04-.44.22c-.15.17-.58.57-.58 1.38s.6 1.6.68 1.71c.08.11 1.17 1.79 2.84 2.51 1.67.72 1.67.48 1.97.45.3-.03.96-.39 1.1-.77.14-.38.14-.7.1-.77-.05-.07-.16-.11-.33-.19z"/>
             </svg>
             Order via WhatsApp
-          </button> */}
+          </button>
           <button className="cta-email" onClick={handleEmail}>
             <svg viewBox="0 0 16 16" fill="none" width="15" height="15">
               <path d="M2 4h12v8H2V4z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round"/>
@@ -131,9 +130,19 @@ export default function HowToOrder() {
           </button>
         </div>
 
-        <p className="how-disclaimer">
-          All purchases are processed and fulfilled in accordance with LogoGround.com's official Terms &amp; Conditions and User Agreement.
-        </p>
+        <div className="terms-note">
+          <p className="terms-text">
+            All logos shown here are listed on LogoGround.com. Final file formats, revision terms, and the copyright transfer process are determined by LogoGround's official policies — please read these before purchasing so you know exactly what you're getting.
+          </p>
+          <div className="terms-links">
+            <a href={LG_FAQ_URL} target="_blank" rel="noopener noreferrer" className="terms-link">
+              Buyer FAQ ↗
+            </a>
+            <a href={LG_TERMS_URL} target="_blank" rel="noopener noreferrer" className="terms-link">
+              User Agreement &amp; Terms ↗
+            </a>
+          </div>
+        </div>
       </div>
 
       <style jsx>{`
@@ -327,11 +336,34 @@ export default function HowToOrder() {
           transform: translateY(-1px);
         }
 
-        .how-disclaimer {
-          font-size: 11.5px;
-          color: var(--text-muted);
-          line-height: 1.6;
+        .terms-note {
+          background: rgba(79,142,247,0.06);
+          border: 1px solid rgba(79,142,247,0.2);
+          border-radius: var(--radius-md);
+          padding: 16px 20px;
           margin-top: -16px;
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+        }
+        .terms-text {
+          font-size: 12.5px;
+          color: var(--text-secondary);
+          line-height: 1.65;
+        }
+        .terms-links {
+          display: flex;
+          gap: 18px;
+          flex-wrap: wrap;
+        }
+        .terms-link {
+          font-size: 12px;
+          font-weight: 600;
+          color: var(--accent-blue);
+          text-decoration: none;
+        }
+        .terms-link:hover {
+          text-decoration: underline;
         }
 
         @media (max-width: 640px) {
