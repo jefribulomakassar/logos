@@ -21,13 +21,13 @@ interface LogoGridProps {
   categories: string[]
 }
 
-type Columns = 3 | 4 | 5
+type Columns = 'auto' | 3 | 4 | 5
 
 export default function LogoGrid({ logos, categories }: LogoGridProps) {
   const [search, setSearch] = useState('')
   const [activeCategory, setActiveCategory] = useState('All')
   const [sortBy, setSortBy] = useState<'newest' | 'price-asc' | 'price-desc'>('newest')
-  const [columns, setColumns] = useState<Columns>(3)
+  const [columns, setColumns] = useState<Columns>('auto')
 
   const { likedIds, toggleLike } = useLikes()
 
@@ -58,6 +58,7 @@ export default function LogoGrid({ logos, categories }: LogoGridProps) {
   }, [logos, activeCategory, search, sortBy])
 
   const colIcons: { val: Columns; label: string }[] = [
+    { val: 'auto', label: 'A' },
     { val: 3, label: '⊞' },
     { val: 4, label: '⊟' },
     { val: 5, label: '≣' },
@@ -102,9 +103,9 @@ export default function LogoGrid({ logos, categories }: LogoGridProps) {
                 key={val}
                 className={`col-btn ${columns === val ? 'active' : ''}`}
                 onClick={() => setColumns(val)}
-                title={`${val} columns`}
+                title={val === 'auto' ? 'Auto (sesuaikan lebar layar)' : `${val} columns`}
               >
-                {val}
+                {label}
               </button>
             ))}
           </div>
@@ -130,7 +131,15 @@ export default function LogoGrid({ logos, categories }: LogoGridProps) {
         </p>
 
         {filtered.length > 0 ? (
-          <div className="logo-grid" style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}>
+          <div
+            className="logo-grid"
+            style={{
+              gridTemplateColumns:
+                columns === 'auto'
+                  ? 'repeat(auto-fill, minmax(260px, 1fr))'
+                  : `repeat(${columns}, 1fr)`,
+            }}
+          >
             {filtered.map(logo => (
               <LogoCard key={logo.id} logo={logo} />
             ))}
@@ -256,6 +265,11 @@ export default function LogoGrid({ logos, categories }: LogoGridProps) {
             background: var(--accent-gold-dim);
             border-color: rgba(245, 200, 66, 0.4);
             color: var(--accent-gold);
+          }
+          .col-btn:first-child {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.02em;
           }
 
           .cat-filter {
