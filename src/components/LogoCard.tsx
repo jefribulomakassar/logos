@@ -5,17 +5,20 @@ import { useRouter } from 'next/navigation'
 import { Logo, getGoogleDriveImageUrl, getEffectivePrice } from '@/lib/sheets'
 import { useLikesContext } from './LogoGrid'
 import { useSession, signIn } from 'next-auth/react'
+import LogoLightbox from './LogoLightbox'
 
 interface LogoCardProps {
   logo: Logo
+  layout?: 'grid' | 'list'
 }
 
-export default function LogoCard({ logo }: LogoCardProps) {
+export default function LogoCard({ logo, layout = 'grid' }: LogoCardProps) {
   const router = useRouter()
   const [imgError, setImgError] = useState(false)
   const [mockupImages, setMockupImages] = useState<{ id: string; thumbnailUrl: string }[]>([])
   const [showMockup, setShowMockup] = useState(false)
   const [loadingMockup, setLoadingMockup] = useState(false)
+  const [showLightbox, setShowLightbox] = useState(false)
 
   const imageUrl = getGoogleDriveImageUrl(logo.logoShow)
   const { price: effectivePrice, isSpecial } = getEffectivePrice(logo)
@@ -60,13 +63,268 @@ export default function LogoCard({ logo }: LogoCardProps) {
     }
   }
 
+  // Mode grid: klik card navigasi ke halaman detail (perilaku lama).
+  // Mode list: klik baris membuka lightbox popup untuk lihat detail cepat.
   const handleCardClick = () => {
-    router.push(`/logo/${logo.id}`)
+    if (layout === 'list') {
+      setShowLightbox(true)
+    } else {
+      router.push(`/logo/${logo.id}`)
+    }
   }
 
   const handleViewLogo = (e: React.MouseEvent) => {
     e.stopPropagation()
     if (logo.logoUrl) window.open(logo.logoUrl, '_blank')
+  }
+
+  if (layout === 'list') {
+    return (
+      <>
+        <article className={'logo-row' + (isSpecial ? ' on-sale' : '')} onClick={handleCardClick}>
+          <div className="row-image-wrap">
+            {!imgError && imageUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={imageUrl}
+                alt={logo.title}
+                className="row-image"
+                onError={() => setImgError(true)}
+                loading="lazy"
+              />
+            ) : (
+              <div className="row-image-placeholder">
+                <span>{logo.title.charAt(0)}</span>
+              </div>
+            )}
+          </div>
+
+          <div className="row-body">
+            <div className="row-main">
+              <div className="row-cats">
+                {allCategories.map(cat => (
+                  <span key={cat} className="cat-badge">{cat}</span>
+                ))}
+              </div>
+              <h3 className="row-title">{logo.title}</h3>
+              <p className="row-desc">{logo.description}</p>
+              <span className="row-creator">by {logo.creator}</span>
+            </div>
+
+            <div className="row-side">
+              <div className="price-wrap">
+                {isSpecial && (
+                  <span className="price-original">${logo.price.toLocaleString()}</span>
+                )}
+                <span className="row-price" style={{ color: isSpecial ? '#F5C842' : 'var(--accent-gold)' }}>
+                  {priceDisplay}
+                </span>
+                {isSpecial && savedAmount > 0 && (
+                  <span className="save-badge">Save ${savedAmount}</span>
+                )}
+              </div>
+              <div className="row-actions">
+                <button
+                  className={'like-btn-row' + (isLiked ? ' liked' : '')}
+                  onClick={handleLike}
+                  title={session ? (isLiked ? 'Unlike' : 'Like') : 'Sign in to like'}
+                >
+                  <svg viewBox="0 0 16 16" fill={isLiked ? 'currentColor' : 'none'} width="14" height="14">
+                    <path d="M8 13.5S1.5 9.5 1.5 5.5a3.5 3.5 0 016.5-1.8A3.5 3.5 0 0114.5 5.5c0 4-6.5 8-6.5 8z" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </button>
+                {logo.logoUrl && (
+                  <button className="btn-action btn-view" onClick={handleViewLogo} title="View on LogoGround">
+                    View
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <style jsx>{`
+            .logo-row {
+              display: flex;
+              gap: 20px;
+              background: var(--bg-card);
+              border: 1px solid var(--border);
+              border-radius: var(--radius-lg);
+              padding: 16px;
+              cursor: pointer;
+              transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            }
+            .logo-row.on-sale {
+              border-color: rgba(245,200,66,0.35);
+              box-shadow: 0 0 16px rgba(245,200,66,0.06);
+            }
+            .logo-row:hover {
+              border-color: var(--border-hover);
+              box-shadow: var(--shadow-card);
+            }
+            .row-image-wrap {
+              flex-shrink: 0;
+              width: 110px;
+              height: 110px;
+              border-radius: var(--radius-md);
+              overflow: hidden;
+              background: #0D0D15;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            }
+            .row-image {
+              width: 100%;
+              height: 100%;
+              object-fit: contain;
+              padding: 10px;
+            }
+            .row-image-placeholder {
+              font-family: 'Space Grotesk', sans-serif;
+              font-size: 2rem;
+              font-weight: 700;
+              color: var(--text-muted);
+            }
+            .row-body {
+              flex: 1;
+              display: flex;
+              justify-content: space-between;
+              gap: 16px;
+              min-width: 0;
+            }
+            .row-main {
+              display: flex;
+              flex-direction: column;
+              gap: 6px;
+              min-width: 0;
+              flex: 1;
+            }
+            .row-cats {
+              display: flex;
+              flex-wrap: wrap;
+              gap: 5px;
+            }
+            .cat-badge {
+              font-size: 10px;
+              font-weight: 500;
+              letter-spacing: 0.04em;
+              text-transform: uppercase;
+              color: var(--accent-blue);
+              background: var(--accent-blue-dim);
+              padding: 3px 8px;
+              border-radius: 4px;
+            }
+            .row-title {
+              font-size: 16px;
+              font-weight: 600;
+              color: var(--text-primary);
+              line-height: 1.3;
+            }
+            .row-desc {
+              font-size: 13px;
+              color: var(--text-secondary);
+              line-height: 1.55;
+              display: -webkit-box;
+              -webkit-line-clamp: 2;
+              -webkit-box-orient: vertical;
+              overflow: hidden;
+            }
+            .row-creator {
+              font-size: 11px;
+              color: var(--text-muted);
+              font-style: italic;
+            }
+            .row-side {
+              flex-shrink: 0;
+              display: flex;
+              flex-direction: column;
+              align-items: flex-end;
+              justify-content: space-between;
+              gap: 10px;
+              min-width: 120px;
+            }
+            .price-wrap {
+              display: flex;
+              flex-direction: column;
+              align-items: flex-end;
+              gap: 4px;
+            }
+            .row-price {
+              font-family: 'Space Grotesk', sans-serif;
+              font-weight: 700;
+              font-size: 18px;
+            }
+            .price-original {
+              font-size: 12px;
+              color: var(--text-muted);
+              text-decoration: line-through;
+              font-family: 'Space Grotesk', sans-serif;
+            }
+            .save-badge {
+              font-size: 9px;
+              font-weight: 600;
+              letter-spacing: 0.06em;
+              color: #F5C842;
+              background: rgba(245,200,66,0.12);
+              border: 1px solid rgba(245,200,66,0.3);
+              padding: 2px 7px;
+              border-radius: 4px;
+            }
+            .row-actions {
+              display: flex;
+              align-items: center;
+              gap: 8px;
+            }
+            .like-btn-row {
+              width: 30px; height: 30px;
+              border-radius: 50%;
+              background: rgba(20,20,30,0.85);
+              border: 1px solid rgba(255,255,255,0.15);
+              color: var(--text-muted);
+              display: flex; align-items: center; justify-content: center;
+              cursor: pointer;
+              transition: all 0.2s;
+            }
+            .like-btn-row.liked {
+              color: #FF4D6D;
+              border-color: rgba(255,77,109,0.4);
+              background: rgba(255,77,109,0.15);
+            }
+            .like-btn-row:hover { color: #FF4D6D; }
+            .btn-action.btn-view {
+              background: rgba(245, 200, 66, 0.9);
+              color: #0A0A0F;
+              font-family: 'Inter', sans-serif;
+              font-size: 11px;
+              font-weight: 600;
+              padding: 7px 12px;
+              border-radius: 6px;
+              border: none;
+              cursor: pointer;
+              white-space: nowrap;
+            }
+            .btn-action.btn-view:hover { background: rgba(245, 200, 66, 1); }
+
+            @media (max-width: 560px) {
+              .logo-row { flex-wrap: wrap; }
+              .row-image-wrap { width: 84px; height: 84px; }
+              .row-body { flex-direction: column; gap: 10px; }
+              .row-side { flex-direction: row; align-items: center; width: 100%; }
+              .price-wrap { flex-direction: row; align-items: center; }
+            }
+          `}</style>
+        </article>
+
+        {showLightbox && (
+          <LogoLightbox
+            logo={logo}
+            onClose={() => setShowLightbox(false)}
+            isLiked={isLiked}
+            onToggleLike={handleLike}
+            canLike={!!session}
+          />
+        )}
+      </>
+    )
   }
 
   return (
