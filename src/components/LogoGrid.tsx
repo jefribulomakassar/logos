@@ -105,7 +105,7 @@ export default function LogoGrid({ logos, categories }: LogoGridProps) {
                 className={`col-btn ${columns === val ? 'active' : ''}`}
                 onClick={() => setColumns(val)}
                 title={
-                  val === 'auto' ? 'Auto (sesuaikan lebar layar)' :
+                  val === 'auto' ? 'Auto (adjust screen width)' :
                   val === 'list' ? 'List view' :
                   `${val} columns`
                 }
