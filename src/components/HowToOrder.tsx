@@ -5,7 +5,7 @@ import ContactModal from './ContactModal'
 
 // ─── Config — samakan dengan LogoCard.tsx ─────────────────────────────────────
 // const WA_NUMBER = '6282xxxxxxxxx' // [DINONAKTIFKAN] ganti dengan nomor WA kamu (format internasional, tanpa +) — uncomment untuk reaktivasi WA
-const LG_PORTFOLIO_URL = 'https://www.logoground.com/designer.php?did=228137' // URL profil LogoGround
+const LG_PORTFOLIO_URL = 'https://www.logoground.com/profile.php?id=jeflodesign' // URL profil LogoGround
 const LG_TERMS_URL = 'https://www.logoground.com/user-agreement.php' // User Agreement resmi LogoGround
 const LG_FAQ_URL = 'https://www.logoground.com/faq.php' // Buyer FAQ resmi LogoGround
 // ──────────────────────────────────────────────────────────────────────────────
