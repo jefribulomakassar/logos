@@ -27,7 +27,7 @@ export default function LogoCard({ logo }: LogoCardProps) {
 
   const handleLike = (e: React.MouseEvent) => {
     e.stopPropagation()
-    toggleLike(logo.id)
+    toggleLike(logo.id, logo.title)
   }
 
   const handleToggleMockup = async (e: React.MouseEvent) => {
