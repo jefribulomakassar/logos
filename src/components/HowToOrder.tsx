@@ -2,6 +2,7 @@
 
 // ─── Config — samakan dengan LogoCard.tsx ─────────────────────────────────────
 const WA_NUMBER = '6282xxxxxxxxx' // ganti dengan nomor WA kamu (format internasional, tanpa +)
+const CONTACT_EMAIL = 'youremail@example.com' // ganti dengan email kontak kamu
 const LG_PORTFOLIO_URL = 'https://www.logoground.com/profile.php?id=jeflodesign' // URL profil LogoGround
 // ──────────────────────────────────────────────────────────────────────────────
 
@@ -19,18 +20,19 @@ const STEPS = [
   },
   {
     num: '02',
-    title: 'Contact via WhatsApp or LogoGround',
-    desc: 'Tap "Order via WA" to chat directly, or click "LogoGround" to purchase through the platform.',
+    title: 'Contact via email or LogoGround',
+    desc: 'Reach out by email, or click straight through to LogoGround.com to purchase the logo you like directly on the platform.',
     icon: (
       <svg viewBox="0 0 24 24" fill="none" width="22" height="22">
-        <path d="M12 2C6.48 2 2 6.13 2 11.2c0 1.89.55 3.65 1.5 5.12L2 22l5.75-1.48A10.18 10.18 0 0012 21.4c5.52 0 10-4.13 10-9.2S17.52 2 12 2z" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M3 5h18v14H3V5z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round"/>
+        <path d="M3 5l9 7 9-7" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
       </svg>
     ),
   },
   {
     num: '03',
-    title: 'Pay & receive all files',
-    desc: 'After payment, receive source files (AI, SVG, PNG, PDF) within 24 hours. The logo is then removed from the marketplace — yours exclusively.',
+    title: 'Logo processed by the LogoGround team',
+    desc: 'Once your order and payment are confirmed, the LogoGround team takes it from there until completion — full ownership and copyright then transfer to you, in accordance with LogoGround\'s Terms & Conditions.',
     icon: (
       <svg viewBox="0 0 24 24" fill="none" width="22" height="22">
         <path d="M12 2v10m0 0l-3-3m3 3l3-3" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
@@ -41,18 +43,23 @@ const STEPS = [
 ]
 
 const INCLUDED = [
-  'Source file (Adobe Illustrator .AI)',
+  'Source file (Adobe Illustrator .AI / EPS)',
   'Vector file (.SVG)',
   'High-res transparent .PNG',
   'Print-ready .PDF',
   '100% exclusive ownership',
-  'Full commercial rights',
+  'Full copyright transfer',
 ]
 
 export default function HowToOrder() {
   const handleWa = () => {
     const msg = encodeURIComponent("Hi! I'd like to order a logo from VibeLogos. Can you help me?")
     window.open(`https://wa.me/${WA_NUMBER}?text=${msg}`, '_blank')
+  }
+
+  const handleEmail = () => {
+    const subject = encodeURIComponent("Logo order inquiry — VibeLogos")
+    window.location.href = `mailto:${CONTACT_EMAIL}?subject=${subject}`
   }
 
   const handleLogoGround = () => {
@@ -109,13 +116,24 @@ export default function HowToOrder() {
             </svg>
             Order via WhatsApp
           </button>
+          <button className="cta-email" onClick={handleEmail}>
+            <svg viewBox="0 0 16 16" fill="none" width="15" height="15">
+              <path d="M2 4h12v8H2V4z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round"/>
+              <path d="M2 4l6 4.5L14 4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            Contact via Email
+          </button>
           <button className="cta-lg" onClick={handleLogoGround}>
             <svg viewBox="0 0 16 16" fill="none" width="15" height="15">
               <path d="M6 3H3a1 1 0 00-1 1v9a1 1 0 001 1h9a1 1 0 001-1v-3M10 2h4m0 0v4m0-4L7 9" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
-            Browse on LogoGround
+            Buy on LogoGround
           </button>
         </div>
+
+        <p className="how-disclaimer">
+          All purchases are processed and fulfilled in accordance with LogoGround.com's official Terms &amp; Conditions and User Agreement.
+        </p>
       </div>
 
       <style jsx>{`
@@ -269,6 +287,25 @@ export default function HowToOrder() {
           background: #1EBF5A;
           transform: translateY(-1px);
         }
+        .cta-email {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 11px 22px;
+          border-radius: 8px;
+          font-family: 'Inter', sans-serif;
+          font-size: 13px;
+          font-weight: 600;
+          cursor: pointer;
+          background: rgba(79,142,247,0.12);
+          color: var(--accent-blue);
+          border: 1px solid rgba(79,142,247,0.35);
+          transition: background 0.2s, transform 0.15s;
+        }
+        .cta-email:hover {
+          background: rgba(79,142,247,0.2);
+          transform: translateY(-1px);
+        }
         .cta-lg {
           display: flex;
           align-items: center;
@@ -290,13 +327,20 @@ export default function HowToOrder() {
           transform: translateY(-1px);
         }
 
+        .how-disclaimer {
+          font-size: 11.5px;
+          color: var(--text-muted);
+          line-height: 1.6;
+          margin-top: -16px;
+        }
+
         @media (max-width: 640px) {
           .how-section { padding: 40px 16px; }
           .how-title { font-size: 22px; }
           .steps-grid { grid-template-columns: 1fr; }
           .included-list { grid-template-columns: 1fr; }
           .how-cta { flex-direction: column; }
-          .cta-wa, .cta-lg { justify-content: center; }
+          .cta-wa, .cta-email, .cta-lg { justify-content: center; }
         }
       `}</style>
     </section>
