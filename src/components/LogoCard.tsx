@@ -699,7 +699,46 @@ export default function LogoCard({ logo, layout = 'grid' }: LogoCardProps) {
         `}</style>
       </article>
 
-      <MockupLightbox />
+      {lightboxMockup && (
+        <div
+          onClick={() => setLightboxMockup(null)}
+          style={{
+            position: 'fixed', inset: 0,
+            background: 'rgba(8,8,12,0.92)',
+            backdropFilter: 'blur(8px)',
+            zIndex: 2000,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '24px',
+          }}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={lightboxMockup.thumbnailUrl}
+            alt="mockup full"
+            onClick={e => e.stopPropagation()}
+            style={{
+              maxWidth: '90vw',
+              maxHeight: '88vh',
+              objectFit: 'contain',
+              borderRadius: '12px',
+              boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
+            }}
+          />
+          <button
+            onClick={() => setLightboxMockup(null)}
+            style={{
+              position: 'fixed', top: 20, right: 20,
+              width: 38, height: 38, borderRadius: '50%',
+              background: 'rgba(20,20,30,0.9)',
+              border: '1px solid rgba(255,255,255,0.2)',
+              color: '#fff', fontSize: 20, cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}
+          >×</button>
+        </div>
+      )}
     </>
   )
 }
