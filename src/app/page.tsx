@@ -2,7 +2,7 @@ import { fetchLogos, getAllCategories, getEffectivePrice } from '@/lib/sheets'
 import Header from '@/components/Header'
 import LogoGrid from '@/components/LogoGrid'
 import Footer from '@/components/Footer'
-
+import HowToOrder from '@/components/HowToOrder'
 export const revalidate = 3600
 
 export default async function HomePage() {
@@ -22,6 +22,7 @@ export default async function HomePage() {
         borderBottom: '1px solid rgba(255,255,255,0.08)'
       }} />
       <LogoGrid logos={logos} categories={categories} />
+      <HowToOrder />
       <Footer />
     </main>
   )
