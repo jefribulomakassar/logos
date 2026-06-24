@@ -8,7 +8,7 @@ import { useLikes } from '@/hooks/useLikes'
 // Context agar LogoCard bisa akses likes tanpa prop drilling
 interface LikesContextType {
   likedIds: Set<string>
-  toggleLike: (id: string, title?: string) => void
+  toggleLike: (id: string, title?: string, url?: string) => void
 }
 export const LikesContext = createContext<LikesContextType>({
   likedIds: new Set(),
