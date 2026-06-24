@@ -295,7 +295,6 @@ export default function LogoCard({ logo, layout = 'grid' }: LogoCardProps) {
 
         {lightboxMockup && (
           <div
-            className="mockup-lightbox-overlay"
             onClick={() => setLightboxMockup(null)}
             style={{
               position: 'fixed', inset: 0,
@@ -308,6 +307,7 @@ export default function LogoCard({ logo, layout = 'grid' }: LogoCardProps) {
               padding: '24px',
             }}
           >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={lightboxMockup.thumbnailUrl}
               alt="mockup full"
