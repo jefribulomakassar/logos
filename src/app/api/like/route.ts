@@ -5,18 +5,32 @@ import { google } from 'googleapis'
 const SPREADSHEET_ID = process.env.GOOGLE_SHEET_ID as string
 const SHEET_NAME = 'favorites'
 
+function getPrivateKey(): string {
+  let key = process.env.GOOGLE_PRIVATE_KEY || ''
+  // Buang quote pembungkus kalau env var tersimpan dengan tanda kutip literal
+  if (
+    (key.startsWith('"') && key.endsWith('"')) ||
+    (key.startsWith("'") && key.endsWith("'"))
+  ) {
+    key = key.slice(1, -1)
+  }
+  // Ganti literal "\n" (backslash-n dua karakter) jadi newline asli
+  key = key.replace(/\\n/g, '\n')
+  return key
+}
+
 function getSheets() {
   const auth = new google.auth.GoogleAuth({
     credentials: {
       client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-      private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+      private_key: getPrivateKey(),
     },
     scopes: ['https://www.googleapis.com/auth/spreadsheets'],
   })
   return google.sheets({ version: 'v4', auth })
 }
 
-// Urutan kolom di sheet: A=USER_EMAIL, B=LOGO_ID, C=LOGO_TITLE, D=TIMESTAMP
+// Urutan kolom di sheet: A=USER_EMAIL, B=LOGO_ID, C=LOGO_TITLE, D=URL_LOGO, E=TIMESTAMP
 
 // GET: ambil semua rows dari sheet favorites
 export async function GET() {
@@ -24,7 +38,7 @@ export async function GET() {
     const sheets = getSheets()
     const res = await sheets.spreadsheets.values.get({
       spreadsheetId: SPREADSHEET_ID,
-      range: `${SHEET_NAME}!A:D`,
+      range: `${SHEET_NAME}!A:E`,
     })
     // Skip header row (baris pertama)
     const allRows = res.data.values || []
@@ -37,9 +51,10 @@ export async function GET() {
 }
 
 // POST: tambah like baru
+// userId di sini diisi dengan EMAIL user yang sudah login (session.user.email)
 export async function POST(req: NextRequest) {
   try {
-    const { logoId, userId, logoTitle } = await req.json()
+    const { logoId, userId, logoTitle, logoUrl } = await req.json()
     if (!logoId || !userId) {
       return NextResponse.json({ error: 'logoId and userId required' }, { status: 400 })
     }
@@ -57,10 +72,10 @@ export async function POST(req: NextRequest) {
     }
     await sheets.spreadsheets.values.append({
       spreadsheetId: SPREADSHEET_ID,
-      range: `${SHEET_NAME}!A:D`,
+      range: `${SHEET_NAME}!A:E`,
       valueInputOption: 'USER_ENTERED',
       requestBody: {
-        values: [[userId, logoId, logoTitle ?? '', new Date().toISOString()]],
+        values: [[userId, logoId, logoTitle ?? '', logoUrl ?? '', new Date().toISOString()]],
       },
     })
     return NextResponse.json({ ok: true })
