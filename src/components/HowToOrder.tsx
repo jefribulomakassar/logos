@@ -2,8 +2,8 @@
 
 // ─── Config — samakan dengan LogoCard.tsx ─────────────────────────────────────
 const WA_NUMBER = '6282xxxxxxxxx' // ganti dengan nomor WA kamu (format internasional, tanpa +)
-const CONTACT_EMAIL = 'youremail@example.com' // ganti dengan email kontak kamu
-const LG_PORTFOLIO_URL = 'https://www.logoground.com/profile.php?id=jeflodesign' // URL profil LogoGround
+const CONTACT_EMAIL = 'jeflodesign@gmail.com' // ganti dengan email kontak kamu
+const LG_PORTFOLIO_URL = 'https://www.logoground.com/designer.php?did=228137' // URL profil LogoGround
 // ──────────────────────────────────────────────────────────────────────────────
 
 const STEPS = [
