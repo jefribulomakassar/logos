@@ -19,6 +19,7 @@ export default function LogoCard({ logo, layout = 'grid' }: LogoCardProps) {
   const [showMockup, setShowMockup] = useState(false)
   const [loadingMockup, setLoadingMockup] = useState(false)
   const [showLightbox, setShowLightbox] = useState(false)
+  const [lightboxMockup, setLightboxMockup] = useState<{ id: string; thumbnailUrl: string } | null>(null)
 
   const imageUrl = getGoogleDriveImageUrl(logo.logoShow)
   const { price: effectivePrice, isSpecial } = getEffectivePrice(logo)
@@ -292,6 +293,47 @@ export default function LogoCard({ logo, layout = 'grid' }: LogoCardProps) {
           `}</style>
         </article>
 
+        {lightboxMockup && (
+          <div
+            className="mockup-lightbox-overlay"
+            onClick={() => setLightboxMockup(null)}
+            style={{
+              position: 'fixed', inset: 0,
+              background: 'rgba(8,8,12,0.9)',
+              backdropFilter: 'blur(6px)',
+              zIndex: 1000,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '24px',
+            }}
+          >
+            <img
+              src={lightboxMockup.thumbnailUrl}
+              alt="mockup full"
+              onClick={e => e.stopPropagation()}
+              style={{
+                maxWidth: '90vw',
+                maxHeight: '88vh',
+                objectFit: 'contain',
+                borderRadius: '12px',
+                boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
+              }}
+            />
+            <button
+              onClick={() => setLightboxMockup(null)}
+              style={{
+                position: 'absolute', top: 20, right: 20,
+                width: 38, height: 38, borderRadius: '50%',
+                background: 'rgba(20,20,30,0.9)',
+                border: '1px solid rgba(255,255,255,0.2)',
+                color: '#fff', fontSize: 20, cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}
+            >×</button>
+          </div>
+        )}
+
         {showLightbox && (
           <LogoLightbox
             logo={logo}
@@ -372,6 +414,7 @@ export default function LogoCard({ logo, layout = 'grid' }: LogoCardProps) {
               alt="mockup"
               className="mockup-thumb"
               loading="lazy"
+              onClick={() => setLightboxMockup(img)}  // ← tambah ini
             />
           ))}
         </div>
