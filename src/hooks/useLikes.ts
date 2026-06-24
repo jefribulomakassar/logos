@@ -1,38 +1,29 @@
 // src/hooks/useLikes.ts
 'use client'
 import { useState, useEffect, useCallback } from 'react'
+import { useSession } from 'next-auth/react'
 
-// Buat atau ambil userId yang persistent di localStorage
-function getOrCreateUserId(): string {
-  if (typeof window === 'undefined') return ''
-  let uid = localStorage.getItem('vibe_uid')
-  if (!uid) {
-    uid = 'u_' + Math.random().toString(36).slice(2) + Date.now().toString(36)
-    localStorage.setItem('vibe_uid', uid)
-  }
-  return uid
-}
-
-// Cache likes dari server di memory (shared antar komponen dalam 1 sesi)
+// Cache likes dari server di memory (shared antar komponen dalam 1 sesi), per-email
 let serverLikesCache: Set<string> | null = null
 let cachePromise: Promise<Set<string>> | null = null
+let cachedForEmail: string | null = null
 
-async function fetchServerLikes(userId: string): Promise<Set<string>> {
-  if (serverLikesCache) return serverLikesCache
-  if (cachePromise) return cachePromise
+async function fetchServerLikes(email: string): Promise<Set<string>> {
+  if (serverLikesCache && cachedForEmail === email) return serverLikesCache
+  if (cachePromise && cachedForEmail === email) return cachePromise
+  cachedForEmail = email
   cachePromise = fetch('/api/like')
     .then(r => r.json())
     .then(data => {
       const rows: string[][] = data.rows || []
-      // Urutan kolom sheet: A=USER_EMAIL(userId), B=LOGO_ID(logoId)
+      // Urutan kolom sheet: A=USER_EMAIL, B=LOGO_ID
       const myLikes = new Set(
-        rows.filter(r => r[0] === userId).map(r => r[1])
+        rows.filter(r => r[0] === email).map(r => r[1])
       )
       serverLikesCache = myLikes
       return myLikes
     })
     .catch(() => {
-      // Fallback ke localStorage jika server error
       cachePromise = null
       return new Set<string>()
     })
@@ -40,27 +31,29 @@ async function fetchServerLikes(userId: string): Promise<Set<string>> {
 }
 
 export function useLikes() {
+  const { data: session, status } = useSession()
+  const email = session?.user?.email ?? null
+
   const [likedIds, setLikedIds] = useState<Set<string>>(new Set())
-  const [userId, setUserId] = useState<string>('')
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const uid = getOrCreateUserId()
-    setUserId(uid)
-    // Muat dari localStorage dulu (instant)
-    const local = JSON.parse(localStorage.getItem('vibe_likes') || '[]') as string[]
-    setLikedIds(new Set(local))
-    // Kemudian sync dari server
-    fetchServerLikes(uid).then(serverLikes => {
-      // Merge: server adalah sumber kebenaran, tapi simpan ulang ke localStorage
+    if (status === 'loading') return
+    if (!email) {
+      // Belum login: tidak ada likes yang bisa ditampilkan
+      setLikedIds(new Set())
+      setLoading(false)
+      return
+    }
+    setLoading(true)
+    fetchServerLikes(email).then(serverLikes => {
       setLikedIds(serverLikes)
-      localStorage.setItem('vibe_likes', JSON.stringify(Array.from(serverLikes)))
       setLoading(false)
     })
-  }, [])
+  }, [email, status])
 
-  const toggleLike = useCallback(async (logoId: string, logoTitle?: string) => {
-    if (!userId) return
+  const toggleLike = useCallback(async (logoId: string, logoTitle?: string, logoUrl?: string) => {
+    if (!email) return // pemanggil harus memicu signIn() dulu sebelum ini
     const isLiked = likedIds.has(logoId)
     const newSet = new Set(likedIds)
     if (isLiked) {
@@ -70,32 +63,30 @@ export function useLikes() {
     }
     // Optimistic update
     setLikedIds(newSet)
-    localStorage.setItem('vibe_likes', JSON.stringify(Array.from(newSet)))
     // Invalidate cache
     serverLikesCache = null
     cachePromise = null
-    // Sync ke server
+    // Sync ke server — userId di body diisi email
     try {
       if (isLiked) {
         await fetch('/api/like', {
           method: 'DELETE',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ logoId, userId }),
+          body: JSON.stringify({ logoId, userId: email }),
         })
       } else {
         await fetch('/api/like', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ logoId, userId, logoTitle }),
+          body: JSON.stringify({ logoId, userId: email, logoTitle, logoUrl }),
         })
       }
     } catch (err) {
       // Rollback jika gagal
       console.error('Failed to sync like to server:', err)
       setLikedIds(likedIds)
-      localStorage.setItem('vibe_likes', JSON.stringify(Array.from(likedIds)))
     }
-  }, [userId, likedIds])
+  }, [email, likedIds])
 
-  return { likedIds, toggleLike, loading }
+  return { likedIds, toggleLike, loading, isLoggedIn: !!email }
 }
