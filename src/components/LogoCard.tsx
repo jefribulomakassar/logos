@@ -6,7 +6,6 @@ import { Logo, getGoogleDriveImageUrl, getEffectivePrice } from '@/lib/sheets'
 import { useLikesContext } from './LogoGrid'
 import { useSession, signIn } from 'next-auth/react'
 import LogoLightbox from './LogoLightbox'
-import MockupLightbox from './MockupLightbox'
 
 interface LogoCardProps {
   logo: Logo
@@ -17,8 +16,8 @@ export default function LogoCard({ logo, layout = 'grid' }: LogoCardProps) {
   const router = useRouter()
   const [imgError, setImgError] = useState(false)
   const [mockupImages, setMockupImages] = useState<{ id: string; thumbnailUrl: string }[]>([])
+  const [showMockup, setShowMockup] = useState(false)
   const [loadingMockup, setLoadingMockup] = useState(false)
-  const [showMockupLightbox, setShowMockupLightbox] = useState(false)
   const [showLightbox, setShowLightbox] = useState(false)
 
   const imageUrl = getGoogleDriveImageUrl(logo.logoShow)
@@ -42,18 +41,21 @@ export default function LogoCard({ logo, layout = 'grid' }: LogoCardProps) {
 
   const handleToggleMockup = async (e: React.MouseEvent) => {
     e.stopPropagation()
-    if (!logo.mockupFolderId) return
-    // Jika sudah ada data, langsung buka lightbox
-    if (mockupImages.length > 0) {
-      setShowMockupLightbox(true)
+    if (showMockup) {
+      setShowMockup(false)
       return
     }
+    if (mockupImages.length > 0) {
+      setShowMockup(true)
+      return
+    }
+    if (!logo.mockupFolderId) return
     setLoadingMockup(true)
     try {
       const res = await fetch(`/api/mockups?folderId=${logo.mockupFolderId}`)
       const data = await res.json()
       setMockupImages(data.images || [])
-      setShowMockupLightbox(true)
+      setShowMockup(true)
     } catch {
       console.error('Failed to load mockups')
     } finally {
@@ -342,9 +344,9 @@ export default function LogoCard({ logo, layout = 'grid' }: LogoCardProps) {
           )}
           {logo.mockupFolderId && (
             <button
-              className={`btn-action btn-mockup${loadingMockup ? ' loading' : ''}`}
+              className={`btn-action btn-mockup ${showMockup ? 'active' : ''}`}
               onClick={handleToggleMockup}
-              title="Preview mockups"
+              title="Toggle mockups"
             >
               {loadingMockup ? (
                 <span className="spinner" />
@@ -354,18 +356,28 @@ export default function LogoCard({ logo, layout = 'grid' }: LogoCardProps) {
                   <path d="M4 13h8M11 6h3v7H6v-3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
                 </svg>
               )}
-              Mockup
+              {showMockup ? 'Hide' : 'Mockup'}
             </button>
           )}
         </div>
       </div>
 
-      {showMockupLightbox && mockupImages.length > 0 && (
-        <MockupLightbox
-          logo={logo}
-          images={mockupImages}
-          onClose={() => setShowMockupLightbox(false)}
-        />
+      {showMockup && mockupImages.length > 0 && (
+        <div className="mockup-strip" onClick={e => e.stopPropagation()}>
+          {mockupImages.map(img => (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              key={img.id}
+              src={img.thumbnailUrl}
+              alt="mockup"
+              className="mockup-thumb"
+              loading="lazy"
+            />
+          ))}
+        </div>
+      )}
+      {showMockup && mockupImages.length === 0 && !loadingMockup && (
+        <div className="mockup-empty">No mockup images found</div>
       )}
 
       <div className="card-body">
@@ -541,6 +553,11 @@ export default function LogoCard({ logo, layout = 'grid' }: LogoCardProps) {
           border: 1px solid rgba(255,255,255,0.15);
         }
         .btn-mockup:hover { background: rgba(40, 40, 55, 0.95); }
+        .btn-mockup.active {
+          background: rgba(79, 142, 247, 0.25);
+          border-color: rgba(79, 142, 247, 0.5);
+          color: var(--accent-blue);
+        }
         .spinner {
           width: 10px;
           height: 10px;
@@ -551,6 +568,37 @@ export default function LogoCard({ logo, layout = 'grid' }: LogoCardProps) {
           display: inline-block;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
+        .mockup-strip {
+          display: flex;
+          gap: 8px;
+          overflow-x: auto;
+          padding: 10px 12px;
+          background: #0D0D15;
+          border-top: 1px solid var(--border);
+          scrollbar-width: thin;
+          scrollbar-color: var(--text-muted) transparent;
+        }
+        .mockup-strip::-webkit-scrollbar { height: 3px; }
+        .mockup-strip::-webkit-scrollbar-thumb { background: var(--text-muted); border-radius: 2px; }
+        .mockup-thumb {
+          height: 72px;
+          width: auto;
+          border-radius: 6px;
+          object-fit: cover;
+          flex-shrink: 0;
+          border: 1px solid var(--border);
+          transition: transform 0.2s;
+          cursor: zoom-in;
+        }
+        .mockup-thumb:hover { transform: scale(1.05); }
+        .mockup-empty {
+          padding: 12px 16px;
+          font-size: 12px;
+          color: var(--text-muted);
+          background: #0D0D15;
+          border-top: 1px solid var(--border);
+          text-align: center;
+        }
         .card-body {
           padding: 16px;
           display: flex;
