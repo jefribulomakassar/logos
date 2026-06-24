@@ -16,7 +16,6 @@ export default function LogoCard({ logo, layout = 'grid' }: LogoCardProps) {
   const router = useRouter()
   const [imgError, setImgError] = useState(false)
   const [mockupImages, setMockupImages] = useState<{ id: string; thumbnailUrl: string }[]>([])
-  const [showMockup, setShowMockup] = useState(false)
   const [loadingMockup, setLoadingMockup] = useState(false)
   const [showLightbox, setShowLightbox] = useState(false)
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
@@ -62,23 +61,25 @@ export default function LogoCard({ logo, layout = 'grid' }: LogoCardProps) {
     toggleLike(logo.id, logo.title, logo.logoUrl)
   }
 
-  const handleToggleMockup = async (e: React.MouseEvent) => {
+  // Klik tombol mockup -> ambil data (jika belum ada) -> langsung buka lightbox di index 0
+  const handleOpenMockupLightbox = async (e: React.MouseEvent) => {
     e.stopPropagation()
-    if (showMockup) {
-      setShowMockup(false)
-      return
-    }
-    if (mockupImages.length > 0) {
-      setShowMockup(true)
-      return
-    }
     if (!logo.mockupFolderId) return
+
+    if (mockupImages.length > 0) {
+      openLightbox(0)
+      return
+    }
+
     setLoadingMockup(true)
     try {
       const res = await fetch(`/api/mockups?folderId=${logo.mockupFolderId}`)
       const data = await res.json()
-      setMockupImages(data.images || [])
-      setShowMockup(true)
+      const images = data.images || []
+      setMockupImages(images)
+      if (images.length > 0) {
+        openLightbox(0)
+      }
     } catch {
       console.error('Failed to load mockups')
     } finally {
@@ -448,9 +449,10 @@ export default function LogoCard({ logo, layout = 'grid' }: LogoCardProps) {
             )}
             {logo.mockupFolderId && (
               <button
-                className={`btn-action btn-mockup ${showMockup ? 'active' : ''}`}
-                onClick={handleToggleMockup}
-                title="Toggle mockups"
+                className="btn-action btn-mockup-icon"
+                onClick={handleOpenMockupLightbox}
+                title="Lihat mockup"
+                disabled={loadingMockup}
               >
                 {loadingMockup ? (
                   <span className="spinner" />
@@ -460,30 +462,10 @@ export default function LogoCard({ logo, layout = 'grid' }: LogoCardProps) {
                     <path d="M4 13h8M11 6h3v7H6v-3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
                   </svg>
                 )}
-                {showMockup ? 'Hide' : 'Mockup'}
               </button>
             )}
           </div>
         </div>
-
-        {showMockup && mockupImages.length > 0 && (
-          <div className="mockup-strip" onClick={e => e.stopPropagation()}>
-            {mockupImages.map((img, i) => (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                key={img.id}
-                src={img.thumbnailUrl}
-                alt="mockup"
-                className="mockup-thumb"
-                loading="lazy"
-                onClick={e => { e.stopPropagation(); openLightbox(i) }}
-              />
-            ))}
-          </div>
-        )}
-        {showMockup && mockupImages.length === 0 && !loadingMockup && (
-          <div className="mockup-empty">No mockup images found</div>
-        )}
 
         <div className="card-body">
           <h3 className="card-title">{logo.title}</h3>
@@ -652,17 +634,17 @@ export default function LogoCard({ logo, layout = 'grid' }: LogoCardProps) {
             color: #0A0A0F;
           }
           .btn-view:hover { background: rgba(245, 200, 66, 1); }
-          .btn-mockup {
+          .btn-mockup-icon {
+            width: 28px;
+            height: 28px;
+            padding: 0;
             background: rgba(20, 20, 30, 0.85);
             color: var(--text-primary);
             border: 1px solid rgba(255,255,255,0.15);
+            justify-content: center;
           }
-          .btn-mockup:hover { background: rgba(40, 40, 55, 0.95); }
-          .btn-mockup.active {
-            background: rgba(79, 142, 247, 0.25);
-            border-color: rgba(79, 142, 247, 0.5);
-            color: var(--accent-blue);
-          }
+          .btn-mockup-icon:hover { background: rgba(40, 40, 55, 0.95); }
+          .btn-mockup-icon:disabled { cursor: default; opacity: 0.7; }
           .spinner {
             width: 10px;
             height: 10px;
@@ -673,37 +655,6 @@ export default function LogoCard({ logo, layout = 'grid' }: LogoCardProps) {
             display: inline-block;
           }
           @keyframes spin { to { transform: rotate(360deg); } }
-          .mockup-strip {
-            display: flex;
-            gap: 8px;
-            overflow-x: auto;
-            padding: 10px 12px;
-            background: #0D0D15;
-            border-top: 1px solid var(--border);
-            scrollbar-width: thin;
-            scrollbar-color: var(--text-muted) transparent;
-          }
-          .mockup-strip::-webkit-scrollbar { height: 3px; }
-          .mockup-strip::-webkit-scrollbar-thumb { background: var(--text-muted); border-radius: 2px; }
-          .mockup-thumb {
-            height: 72px;
-            width: auto;
-            border-radius: 6px;
-            object-fit: cover;
-            flex-shrink: 0;
-            border: 1px solid var(--border);
-            transition: transform 0.2s;
-            cursor: zoom-in;
-          }
-          .mockup-thumb:hover { transform: scale(1.05); }
-          .mockup-empty {
-            padding: 12px 16px;
-            font-size: 12px;
-            color: var(--text-muted);
-            background: #0D0D15;
-            border-top: 1px solid var(--border);
-            text-align: center;
-          }
           .card-body {
             padding: 16px;
             display: flex;
@@ -750,26 +701,7 @@ export default function LogoCard({ logo, layout = 'grid' }: LogoCardProps) {
         `}</style>
       </article>
 
-      {lightboxIndex !== null && mockupImages.length > 0 && (
-        <div
-          onClick={closeLightbox}
-          style={{
-            position: 'fixed', inset: 0, zIndex: 2000,
-            background: 'rgba(0,0,0,0.92)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}
-        >
-          <button onClick={closeLightbox} style={{ position: 'absolute', top: 20, right: 24, background: 'rgba(255,255,255,0.08)', border: 'none', color: '#F5F5F0', fontSize: 22, width: 40, height: 40, borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2001 }}>✕</button>
-          <span style={{ position: 'absolute', top: 24, left: '50%', transform: 'translateX(-50%)', fontFamily: 'Inter, sans-serif', fontSize: 13, color: '#8A8A9A' }}>{lightboxIndex + 1} / {mockupImages.length}</span>
-          {mockupImages.length > 1 && <button onClick={e => { e.stopPropagation(); prevImage() }} style={{ position: 'absolute', left: 16, background: 'rgba(255,255,255,0.08)', border: 'none', color: '#F5F5F0', fontSize: 28, width: 44, height: 44, borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2001 }}>‹</button>}
-          <div onClick={e => e.stopPropagation()} style={{ maxWidth: '90vw', maxHeight: '85vh' }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={mockupImages[lightboxIndex].thumbnailUrl} alt={'mockup ' + (lightboxIndex + 1)} style={{ maxWidth: '90vw', maxHeight: '85vh', objectFit: 'contain', borderRadius: 12, boxShadow: '0 8px 60px rgba(0,0,0,0.6)' }} />
-          </div>
-          {mockupImages.length > 1 && <button onClick={e => { e.stopPropagation(); nextImage() }} style={{ position: 'absolute', right: 16, background: 'rgba(255,255,255,0.08)', border: 'none', color: '#F5F5F0', fontSize: 28, width: 44, height: 44, borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2001 }}>›</button>}
-        </div>
-      )}
-      
+      <MockupLightboxOverlay />
     </>
   )
 }
