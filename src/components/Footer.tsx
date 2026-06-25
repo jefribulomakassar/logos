@@ -10,7 +10,7 @@ export default function Footer() {
         </div>
         <p className="footer-text">
           Premium logos by{' '}
-          <a href="https://www.logoground.com" target="_blank" rel="noopener noreferrer" className="footer-link">
+          <a href="https://www.logoground.com/designer.php?did=228137" target="_blank" rel="noopener noreferrer" className="footer-link">
             jeflodesign
           </a>
         </p>
