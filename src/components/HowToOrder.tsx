@@ -97,7 +97,7 @@ export default function HowToOrder() {
         </div>
 
         {/* What's included */}
-        <div className="included-wrap">
+        {/* <div className="included-wrap">
           <p className="included-label">What's included in every purchase</p>
           <ul className="included-list">
             {INCLUDED.map(item => (
@@ -110,7 +110,7 @@ export default function HowToOrder() {
               </li>
             ))}
           </ul>
-        </div>
+        </div> */}
 
         {/* CTA */}
         <div className="how-cta">
