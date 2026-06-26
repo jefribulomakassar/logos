@@ -87,13 +87,65 @@ export function formatDate(raw: string): string {
 
 const SHEET_ID = '1PzZUFsoWL2wAvJGjBIzBpO_2lwRHbBSicys01rEDU_I'
 
+/**
+ * Mengambil File ID Google Drive dari berbagai kemungkinan format URL/string,
+ * lalu mengubahnya menjadi URL thumbnail yang bisa langsung dipakai sebagai <img src>.
+ *
+ * Format yang didukung (tergantung akun/cara link di-copy bisa berbeda-beda):
+ *  - https://drive.google.com/file/d/FILE_ID/view?usp=sharing
+ *  - https://drive.google.com/open?id=FILE_ID
+ *  - https://drive.google.com/uc?id=FILE_ID&export=download
+ *  - https://drive.google.com/uc?export=view&id=FILE_ID
+ *  - https://drive.google.com/thumbnail?id=FILE_ID&sz=w600   (sudah benar, dipakai langsung)
+ *  - https://lh3.googleusercontent.com/d/FILE_ID              (sudah valid, dipakai langsung)
+ *  - FILE_ID polos (33+ karakter alfanumerik/-/_), tanpa URL sama sekali
+ */
 export function getGoogleDriveImageUrl(driveUrl: string): string {
   if (!driveUrl) return ''
-  const fileMatch = driveUrl.match(/\/file\/d\/([^/]+)/)
-  if (fileMatch) {
-    return `https://drive.google.com/thumbnail?id=${fileMatch[1]}&sz=w600`
+  const raw = driveUrl.trim()
+
+  // Sudah berupa link thumbnail Google Drive yang valid -> pakai langsung
+  if (/drive\.google\.com\/thumbnail\?/.test(raw)) {
+    return raw
   }
-  return driveUrl
+
+  // Sudah berupa link googleusercontent yang valid -> pakai langsung
+  if (/lh3\.googleusercontent\.com\//.test(raw)) {
+    return raw
+  }
+
+  // Coba ekstrak File ID dari berbagai pola URL Drive yang umum:
+  //  /file/d/FILE_ID
+  //  ?id=FILE_ID  atau  &id=FILE_ID
+  //  /d/FILE_ID  (format googleusercontent)
+  const patterns = [
+    /\/file\/d\/([a-zA-Z0-9_-]+)/,
+    /[?&]id=([a-zA-Z0-9_-]+)/,
+    /\/d\/([a-zA-Z0-9_-]+)/,
+  ]
+
+  let fileId: string | null = null
+  for (const pattern of patterns) {
+    const match = raw.match(pattern)
+    if (match) {
+      fileId = match[1]
+      break
+    }
+  }
+
+  // Kalau tidak ada match sama sekali tapi string-nya sendiri "terlihat" seperti
+  // File ID Google Drive polos (bukan URL), anggap itu File ID langsung.
+  if (!fileId && /^[a-zA-Z0-9_-]{25,}$/.test(raw)) {
+    fileId = raw
+  }
+
+  if (fileId) {
+    return `https://drive.google.com/thumbnail?id=${fileId}&sz=w600`
+  }
+
+  // Tidak dikenali sama sekali -> kembalikan apa adanya (fallback lama),
+  // supaya tidak menyembunyikan kasus baru yang belum ditangani.
+  return raw
 }
 
 export function extractFolderId(driveUrl: string): string {
